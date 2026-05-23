@@ -1,1 +1,2996 @@
-<div id="root"></div><script type="module" src="/src/main.jsx"></script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguridad Inteligente - Centro de Monitoreo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #0f1628;
+    --bg-card: #131929;
+    --bg-card-hover: #1a2235;
+    --bg-sidebar: #0c1020;
+    --accent-blue: #1e6ef7;
+    --accent-blue-dim: #1a5cd4;
+    --accent-green: #00c853;
+    --accent-yellow: #ffc107;
+    --accent-red: #f44336;
+    --accent-purple: #9c27b0;
+    --text-primary: #e8edf8;
+    --text-secondary: #8a96b3;
+    --text-dim: #4a5578;
+    --border: rgba(255,255,255,0.07);
+    --border-active: rgba(30,110,247,0.4);
+    --glow-blue: 0 0 20px rgba(30,110,247,0.3);
+    --glow-red: 0 0 20px rgba(244,67,54,0.4);
+    --glow-green: 0 0 15px rgba(0,200,83,0.3);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px;
+    min-width: 200px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    position: relative;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent-blue), #0d47a1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: var(--glow-blue);
+    flex-shrink: 0;
+  }
+
+  .logo-text { line-height: 1.2; }
+  .logo-text .brand { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: 1px; }
+  .logo-text .sub { font-size: 10px; color: var(--accent-blue); letter-spacing: 2px; font-weight: 600; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+  }
+
+  .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+  .nav-item.active { background: rgba(30,110,247,0.15); color: var(--accent-blue); border: 1px solid rgba(30,110,247,0.2); }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .badge {
+    background: var(--accent-red);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: auto;
+    min-width: 20px;
+    text-align: center;
+    animation: pulse-badge 2s infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244,67,54,0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(244,67,54,0); }
+  }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .system-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--accent-green);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .time-display {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .time-date { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .page-title { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+  .page-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+
+  .weather-widget {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .notif-btn {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .notif-btn:hover { background: var(--bg-card-hover); border-color: var(--accent-blue); }
+  .notif-btn .badge { position: absolute; top: -4px; right: -4px; margin: 0; }
+
+  .user-widget {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .user-widget:hover { background: var(--bg-card-hover); }
+  .user-avatar { width: 28px; height: 28px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .user-info .name { font-size: 13px; font-weight: 600; }
+  .user-info .role { font-size: 11px; color: var(--text-secondary); }
+
+  /* PAGES */
+  .page { display: none; flex: 1; overflow: hidden; }
+  .page.active { display: flex; }
+
+  /* STATS ROW */
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    padding: 16px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    flex: 1;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .stat-card:hover { border-color: var(--accent-blue); background: var(--bg-card-hover); transform: translateY(-1px); }
+
+  .stat-icon { font-size: 24px; }
+  .stat-num { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .stat-sub { font-size: 11px; color: var(--text-dim); }
+
+  .stat-card.red .stat-icon { color: var(--accent-red); }
+  .stat-card.red .stat-num { color: var(--accent-red); }
+  .stat-card.green .stat-icon { color: var(--accent-green); }
+  .stat-card.green .stat-num { color: var(--accent-green); }
+  .stat-card.blue .stat-icon { color: var(--accent-blue); }
+  .stat-card.blue .stat-num { color: var(--accent-blue); }
+  .stat-card.yellow .stat-icon { color: var(--accent-yellow); }
+  .stat-card.yellow .stat-num { color: var(--accent-yellow); }
+
+  /* CONTENT AREA */
+  .content-area {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* MAP PAGE */
+  #page-mapa {
+    flex-direction: column;
+  }
+
+  .map-container {
+    position: relative;
+    flex: 1;
+    background: #080c18;
+    overflow: hidden;
+  }
+
+  #map-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-controls {
+    position: absolute;
+    right: 16px;
+    bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .map-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+  .map-btn:hover { background: var(--accent-blue); border-color: var(--accent-blue); }
+
+  .map-filters {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .filter-btn {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+  }
+  .filter-btn.active { background: var(--accent-blue); color: white; }
+  .filter-btn:hover:not(.active) { background: var(--bg-card-hover); }
+
+  .map-search {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 220px;
+  }
+  .map-search input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    width: 100%;
+  }
+
+  .map-legend {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    background: rgba(10,14,26,0.85);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Map marker tooltips */
+  .map-marker {
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .map-marker:hover { transform: scale(1.2); }
+
+  /* SIDEBAR PANEL (RIGHT) */
+  .side-panel {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .panel-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .see-all { color: var(--accent-blue); cursor: pointer; font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+  .see-all:hover { text-decoration: underline; }
+
+  .cam-thumbnail {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cam-thumbnail:hover { border-color: var(--accent-blue); background: var(--bg-card-hover); }
+  .cam-img { width: 60px; height: 40px; border-radius: 4px; background: #1a2235; overflow: hidden; position: relative; flex-shrink: 0; }
+  .cam-img canvas { width: 100%; height: 100%; }
+  .cam-info { flex: 1; }
+  .cam-name { font-size: 12px; font-weight: 600; }
+  .cam-status { font-size: 11px; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+
+  .alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .alert-item:hover { background: var(--bg-card-hover); transform: translateX(2px); }
+  .alert-item.red { border-left-color: var(--accent-red); }
+  .alert-item.yellow { border-left-color: var(--accent-yellow); }
+  .alert-item-title { font-size: 13px; font-weight: 600; }
+  .alert-item-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .alert-item-time { font-size: 11px; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
+
+  /* CAMERAS PAGE */
+  #page-camaras {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .cams-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .search-input {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 280px;
+  }
+  .search-input input {
+    background: none; border: none; outline: none;
+    color: var(--text-primary); font-size: 13px; width: 100%;
+  }
+
+  .select-input {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .view-toggle { display: flex; gap: 4px; }
+  .view-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+  }
+  .view-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+
+  .cams-content { display: flex; flex: 1; overflow: hidden; }
+
+  .cams-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 16px 24px;
+    overflow-y: auto;
+    align-content: start;
+  }
+
+  .cam-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .cam-card:hover { border-color: var(--accent-blue); box-shadow: var(--glow-blue); transform: translateY(-2px); }
+  .cam-card.incident { border-color: rgba(244,67,54,0.5); }
+  .cam-card.unusual { border-color: rgba(255,193,7,0.5); }
+
+  .cam-feed {
+    height: 150px;
+    background: #0a0e1a;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cam-feed canvas { width: 100%; height: 100%; display: block; }
+
+  .cam-overlay-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge-online { background: rgba(0,200,83,0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+  .badge-incident { background: rgba(244,67,54,0.2); color: var(--accent-red); border: 1px solid var(--accent-red); animation: flash 1s infinite; }
+  .badge-unusual { background: rgba(255,193,7,0.2); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
+
+  @keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .cam-card-info { padding: 10px 12px; }
+  .cam-card-name { font-size: 13px; font-weight: 600; }
+  .cam-card-loc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .cam-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .cam-action-btn {
+    flex: 1;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+  }
+  .cam-action-btn:hover { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+  /* DETECTION BOX on cam feeds */
+  .detection-box {
+    position: absolute;
+    border: 2px solid;
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  .detection-box.red { border-color: var(--accent-red); box-shadow: 0 0 8px rgba(244,67,54,0.5); }
+  .detection-box.yellow { border-color: var(--accent-yellow); box-shadow: 0 0 8px rgba(255,193,7,0.5); }
+
+  /* DRONES PAGE */
+  #page-drones { flex-direction: column; overflow: hidden; }
+
+  .drones-content { display: flex; flex: 1; overflow: hidden; }
+
+  .drones-map-area {
+    flex: 1;
+    position: relative;
+    background: #080c18;
+    overflow: hidden;
+  }
+
+  .drones-bottom { display: flex; gap: 0; background: var(--bg-secondary); border-top: 1px solid var(--border); height: 220px; min-height: 220px; }
+
+  .mission-panel, .drone-controls-panel {
+    flex: 1;
+    padding: 16px;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 10px; }
+
+  .mission-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .mission-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .mission-detail { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .mission-stats { display: flex; gap: 16px; margin-top: 10px; }
+  .mission-stat { }
+  .mission-stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .mission-stat-val { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-primary); }
+
+  .mission-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .btn-danger { background: rgba(244,67,54,0.15); border-color: rgba(244,67,54,0.4); color: var(--accent-red); }
+  .btn-danger:hover { background: var(--accent-red); color: white; }
+  .btn-primary { background: var(--accent-blue); color: white; }
+  .btn-primary:hover { background: var(--accent-blue-dim); }
+  .btn-secondary { background: var(--bg-card); border-color: var(--border); color: var(--text-primary); }
+  .btn-secondary:hover { background: var(--bg-card-hover); }
+
+  .joystick-area {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .joystick {
+    width: 100px;
+    height: 100px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+  }
+  .joystick-inner {
+    width: 36px; height: 36px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s;
+    box-shadow: var(--glow-blue);
+  }
+
+  .joystick-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    color: var(--text-primary);
+  }
+  .joystick-btn:hover, .joystick-btn:active { background: var(--accent-blue); border-color: var(--accent-blue); transform: scale(0.95); }
+
+  .joystick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 36px);
+    grid-template-rows: repeat(3, 36px);
+    gap: 4px;
+  }
+
+  .drone-action-btns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    flex: 1;
+  }
+
+  .drone-act-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .drone-act-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); border-color: var(--accent-blue); }
+  .drone-act-btn span:first-child { font-size: 18px; }
+
+  /* DRONES RIGHT PANEL */
+  .drones-right {
+    width: 300px;
+    min-width: 300px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .drones-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .drone-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .drone-list-item:hover { border-color: var(--accent-blue); }
+  .drone-list-item.selected { border-color: var(--accent-blue); background: rgba(30,110,247,0.1); }
+
+  .drone-thumb { width: 48px; height: 36px; background: #1a2235; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .drone-info { flex: 1; }
+  .drone-name { font-size: 13px; font-weight: 600; }
+  .drone-status-text { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  .tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .tag-green { background: rgba(0,200,83,0.15); color: var(--accent-green); border: 1px solid rgba(0,200,83,0.3); }
+  .tag-yellow { background: rgba(255,193,7,0.15); color: var(--accent-yellow); border: 1px solid rgba(255,193,7,0.3); }
+  .tag-red { background: rgba(244,67,54,0.15); color: var(--accent-red); border: 1px solid rgba(244,67,54,0.3); }
+  .tag-blue { background: rgba(30,110,247,0.15); color: var(--accent-blue); border: 1px solid rgba(30,110,247,0.3); }
+  .tag-purple { background: rgba(156,39,176,0.15); color: var(--accent-purple); border: 1px solid rgba(156,39,176,0.3); }
+
+  .battery-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+    width: 100%;
+  }
+  .battery-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+  .battery-fill.high { background: var(--accent-green); }
+  .battery-fill.mid { background: var(--accent-yellow); }
+  .battery-fill.low { background: var(--accent-red); }
+
+  .live-view {
+    height: 160px;
+    background: #080c18;
+    margin: 12px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .live-view canvas { width: 100%; height: 100%; }
+  .live-tag { position: absolute; top: 8px; right: 8px; background: var(--accent-red); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+  .live-label { position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 600; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; }
+
+  .live-controls {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px 12px;
+    justify-content: center;
+  }
+  .live-ctrl-btn {
+    width: 32px; height: 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .live-ctrl-btn:hover { background: var(--accent-blue); border-color: var(--accent-blue); }
+
+  /* ALERTAS PAGE */
+  #page-alertas { flex-direction: column; overflow: hidden; }
+
+  .alertas-content { display: flex; flex: 1; overflow: hidden; }
+
+  .alertas-list-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .alertas-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .alertas-table {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  tbody tr:hover { background: var(--bg-card); }
+  tbody tr.selected-row { background: rgba(30,110,247,0.08); border-left: 2px solid var(--accent-blue); }
+  tbody td { padding: 12px 12px; font-size: 13px; }
+
+  .priority-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .priority-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .status-badge {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .status-activa { background: rgba(244,67,54,0.15); color: var(--accent-red); border: 1px solid rgba(244,67,54,0.3); }
+  .status-atendida { background: rgba(0,200,83,0.15); color: var(--accent-green); border: 1px solid rgba(0,200,83,0.3); }
+  .status-progreso { background: rgba(30,110,247,0.15); color: var(--accent-blue); border: 1px solid rgba(30,110,247,0.3); }
+
+  .alertas-detail {
+    width: 320px;
+    min-width: 320px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(244,67,54,0.1);
+    border: 1px solid rgba(244,67,54,0.3);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  .detail-icon { width: 44px; height: 44px; background: rgba(244,67,54,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .detail-title { font-size: 15px; font-weight: 700; }
+  .detail-source { font-size: 12px; color: var(--text-secondary); }
+  .detail-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 8px; }
+  .detail-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .detail-label { color: var(--text-secondary); }
+  .detail-val { font-weight: 500; }
+
+  .cam-live-detail {
+    height: 140px;
+    background: #080c18;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .cam-live-detail canvas { width: 100%; height: 100%; }
+
+  .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .quick-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid;
+    text-align: center;
+  }
+  .quick-btn.patrulla { background: rgba(244,67,54,0.1); border-color: rgba(244,67,54,0.4); color: var(--accent-red); }
+  .quick-btn.patrulla:hover { background: var(--accent-red); color: white; }
+  .quick-btn.compartir { background: rgba(30,110,247,0.1); border-color: rgba(30,110,247,0.4); color: var(--accent-blue); }
+  .quick-btn.compartir:hover { background: var(--accent-blue); color: white; }
+  .quick-btn.cerrar { background: rgba(0,200,83,0.1); border-color: rgba(0,200,83,0.4); color: var(--accent-green); }
+  .quick-btn.cerrar:hover { background: var(--accent-green); color: white; }
+
+  /* PAGINATION */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .page-btns { display: flex; gap: 4px; }
+  .page-num {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .page-num.active { background: var(--accent-blue); color: white; }
+  .page-num:hover:not(.active) { background: var(--bg-card); border-color: var(--border); }
+
+  /* NOTIFICATION PANEL */
+  .notif-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 500;
+  }
+  .notif-overlay.open { display: block; }
+  .notif-panel {
+    position: absolute;
+    top: 70px;
+    right: 24px;
+    width: 320px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .notif-header { padding: 16px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .notif-list { max-height: 400px; overflow-y: auto; }
+  .notif-item { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; cursor: pointer; transition: background 0.15s; }
+  .notif-item:hover { background: var(--bg-card); }
+  .notif-item.unread { background: rgba(30,110,247,0.05); }
+  .notif-icon { font-size: 20px; }
+  .notif-text { flex: 1; font-size: 13px; }
+  .notif-time { font-size: 11px; color: var(--text-dim); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+  .modal-body { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    animation: toastIn 0.3s ease;
+    min-width: 260px;
+    max-width: 340px;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .toast.success { border-left: 3px solid var(--accent-green); }
+  .toast.error { border-left: 3px solid var(--accent-red); }
+  .toast.info { border-left: 3px solid var(--accent-blue); }
+  .toast.warning { border-left: 3px solid var(--accent-yellow); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+  /* MAP TOOLTIP */
+  .map-tooltip {
+    position: absolute;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 50;
+    display: none;
+    min-width: 160px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  /* INICIO PAGE */
+  #page-inicio {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .inicio-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+    padding: 16px 24px;
+    overflow: hidden;
+  }
+
+  .dash-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .dash-card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+  #activity-chart { width: 100%; flex: 1; }
+
+  .mini-alert-list { flex: 1; overflow-y: auto; }
+  .mini-alert { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .mini-alert-icon { font-size: 16px; }
+  .mini-alert-info { flex: 1; font-size: 12px; }
+  .mini-alert-info strong { display: block; font-weight: 600; }
+  .mini-alert-info span { color: var(--text-secondary); }
+  .mini-alert-time { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+
+  .zone-list { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+  .zone-item { display: flex; align-items: center; gap: 10px; background: var(--bg-secondary); border-radius: 6px; padding: 8px; }
+  .zone-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .zone-name { flex: 1; font-size: 13px; }
+  .zone-status { font-size: 11px; font-weight: 600; }
+
+  .big-stat { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+  .big-number { font-family: 'Rajdhani', sans-serif; font-size: 64px; font-weight: 700; line-height: 1; }
+  .big-label { font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
+
+  /* RESPONSIVE canvas animation */
+  .live-canvas { background: #080c1a; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    <div class="logo-text">
+      <div class="brand">SEGURIDAD<br>INTELIGENTE</div>
+      <div class="sub">CENTRO DE MONITOREO</div>
+    </div>
+  </div>
+
+  <div class="nav-item active" data-page="inicio" onclick="navigate('inicio')">
+    <span class="nav-icon">🏠</span> Inicio
+  </div>
+  <div class="nav-item" data-page="camaras" onclick="navigate('camaras')">
+    <span class="nav-icon">📹</span> Cámaras
+  </div>
+  <div class="nav-item" data-page="mapa" onclick="navigate('mapa')">
+    <span class="nav-icon">🗺️</span> Mapa
+  </div>
+  <div class="nav-item" data-page="drones" onclick="navigate('drones')">
+    <span class="nav-icon">🚁</span> Drones
+  </div>
+  <div class="nav-item" data-page="alertas" onclick="navigate('alertas')">
+    <span class="nav-icon">🔔</span> Alertas
+    <span class="badge" id="nav-badge">5</span>
+  </div>
+  <div class="nav-item" data-page="reportes" onclick="navigate('reportes')">
+    <span class="nav-icon">📋</span> Reportes
+  </div>
+  <div class="nav-item" data-page="historial" onclick="navigate('historial')">
+    <span class="nav-icon">🕐</span> Historial
+  </div>
+  <div class="nav-item" data-page="configuracion" onclick="navigate('configuracion')">
+    <span class="nav-icon">⚙️</span> Configuración
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="system-status">
+      <div class="status-dot"></div>
+      SISTEMA EN LÍNEA
+    </div>
+    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Todos los sistemas funcionando correctamente</div>
+    <div class="time-display" id="clock">10:25 AM</div>
+    <div class="time-date" id="clock-date">20 de mayo, 2026</div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="page-title">INICIO</div>
+      <div class="page-subtitle" id="page-subtitle">Panel principal del centro de monitoreo</div>
+    </div>
+    <div class="topbar-right">
+      <div class="weather-widget">☁️ <strong>23°C</strong> <span style="color:var(--text-secondary)">Nublado</span></div>
+      <div class="notif-btn" onclick="toggleNotif()">
+        🔔
+        <span class="badge" id="topbar-badge">5</span>
+      </div>
+      <div class="user-widget" onclick="showUserMenu()">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <div class="name">Administrador</div>
+          <div class="role">Centro de Monitoreo</div>
+        </div>
+        <span>▾</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: INICIO ===== -->
+  <div class="page active" id="page-inicio">
+    <div style="display:flex;flex-direction:column;width:100%;overflow:hidden;">
+      <div class="stats-row">
+        <div class="stat-card green" onclick="navigate('camaras')">
+          <span class="stat-icon">📹</span>
+          <div>
+            <div class="stat-num">28</div>
+            <div class="stat-label">Cámaras en línea</div>
+            <div class="stat-sub">de 30 totales</div>
+          </div>
+        </div>
+        <div class="stat-card blue" onclick="navigate('drones')">
+          <span class="stat-icon">🚁</span>
+          <div>
+            <div class="stat-num">3</div>
+            <div class="stat-label">Drones activos</div>
+            <div class="stat-sub">de 5 totales</div>
+          </div>
+        </div>
+        <div class="stat-card red" onclick="navigate('alertas')">
+          <span class="stat-icon">⚠️</span>
+          <div>
+            <div class="stat-num" id="stat-alertas">5</div>
+            <div class="stat-label">Alertas activas</div>
+            <div class="stat-sub">incidentes</div>
+          </div>
+        </div>
+        <div class="stat-card yellow" onclick="navigate('mapa')">
+          <span class="stat-icon">🛡️</span>
+          <div>
+            <div class="stat-num">12</div>
+            <div class="stat-label">Zonas seguras</div>
+            <div class="stat-sub">zonas monitoreadas</div>
+          </div>
+        </div>
+      </div>
+      <div class="inicio-content">
+        <!-- Activity Chart -->
+        <div class="dash-card" style="grid-column:1/3;">
+          <div class="dash-card-title">Actividad del sistema - Últimas 24h <span style="color:var(--accent-blue);cursor:pointer;font-weight:600;font-size:11px;" onclick="showToast('Exportando reporte...','info')">Exportar</span></div>
+          <canvas id="activity-chart"></canvas>
+        </div>
+        <!-- Alertas recientes -->
+        <div class="dash-card">
+          <div class="dash-card-title">Alertas recientes <span class="see-all" onclick="navigate('alertas')">Ver todas</span></div>
+          <div class="mini-alert-list">
+            <div class="mini-alert"><span class="mini-alert-icon">🔴</span><div class="mini-alert-info"><strong>Movimiento sospechoso</strong><span>Cam 03 - Av. Principal</span></div><span class="mini-alert-time">10:24</span></div>
+            <div class="mini-alert"><span class="mini-alert-icon">🟡</span><div class="mini-alert-info"><strong>Vehículo sospechoso</strong><span>Cam 07 - Parque Central</span></div><span class="mini-alert-time">10:18</span></div>
+            <div class="mini-alert"><span class="mini-alert-icon">🟡</span><div class="mini-alert-info"><strong>Agrupación inusual</strong><span>Cam 02 - Plaza San Martín</span></div><span class="mini-alert-time">10:15</span></div>
+            <div class="mini-alert"><span class="mini-alert-icon">🟢</span><div class="mini-alert-info"><strong>Reporte ciudadano</strong><span>Jr. Las Flores 456</span></div><span class="mini-alert-time">09:58</span></div>
+            <div class="mini-alert"><span class="mini-alert-icon">🔴</span><div class="mini-alert-info"><strong>Posible robo</strong><span>Cam 05 - Calle 45</span></div><span class="mini-alert-time">09:42</span></div>
+          </div>
+        </div>
+        <!-- Zonas -->
+        <div class="dash-card">
+          <div class="dash-card-title">Estado de zonas <span class="see-all" onclick="navigate('mapa')">Ver mapa</span></div>
+          <div class="zone-list">
+            <div class="zone-item"><div class="zone-color" style="background:var(--accent-green)"></div><div class="zone-name">Col. Centro</div><div class="zone-status" style="color:var(--accent-green)">Segura</div></div>
+            <div class="zone-item"><div class="zone-color" style="background:var(--accent-red)"></div><div class="zone-name">Col. Vista Hermosa</div><div class="zone-status" style="color:var(--accent-red)">Alerta</div></div>
+            <div class="zone-item"><div class="zone-color" style="background:var(--accent-yellow)"></div><div class="zone-name">Parque Central</div><div class="zone-status" style="color:var(--accent-yellow)">Monitoreo</div></div>
+            <div class="zone-item"><div class="zone-color" style="background:var(--accent-green)"></div><div class="zone-name">Col. La Paz</div><div class="zone-status" style="color:var(--accent-green)">Segura</div></div>
+            <div class="zone-item"><div class="zone-color" style="background:var(--accent-green)"></div><div class="zone-name">Zona Escolar</div><div class="zone-status" style="color:var(--accent-green)">Segura</div></div>
+            <div class="zone-item"><div class="zone-color" style="background:var(--accent-green)"></div><div class="zone-name">Col. El Bosque</div><div class="zone-status" style="color:var(--accent-green)">Segura</div></div>
+          </div>
+        </div>
+        <!-- Big stat + cams -->
+        <div class="dash-card">
+          <div class="dash-card-title">Uptime del sistema</div>
+          <div class="big-stat">
+            <div class="big-number" style="color:var(--accent-green)">99.8%</div>
+            <div class="big-label">Disponibilidad en las últimas 24h</div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:12px;">
+            <div style="flex:1;text-align:center;background:var(--bg-secondary);border-radius:8px;padding:10px;">
+              <div style="font-family:Rajdhani,sans-serif;font-size:24px;font-weight:700;color:var(--accent-blue);">1,247</div>
+              <div style="font-size:11px;color:var(--text-secondary)">Eventos hoy</div>
+            </div>
+            <div style="flex:1;text-align:center;background:var(--bg-secondary);border-radius:8px;padding:10px;">
+              <div style="font-family:Rajdhani,sans-serif;font-size:24px;font-weight:700;color:var(--accent-yellow);">18</div>
+              <div style="font-size:11px;color:var(--text-secondary)">Total alertas</div>
+            </div>
+          </div>
+        </div>
+        <!-- Drone status -->
+        <div class="dash-card">
+          <div class="dash-card-title">Estado de drones <span class="see-all" onclick="navigate('drones')">Ver todos</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1;overflow-y:auto;">
+            <div style="display:flex;align-items:center;gap:8px;background:var(--bg-secondary);border-radius:6px;padding:8px;">
+              <span style="font-size:18px;">🚁</span>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;">DRON 01</div>
+                <div style="font-size:11px;color:var(--text-secondary);">En misión - Parque Central</div>
+                <div class="battery-bar"><div class="battery-fill high" style="width:85%"></div></div>
+              </div>
+              <span class="tag tag-green">En vivo</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:var(--bg-secondary);border-radius:6px;padding:8px;">
+              <span style="font-size:18px;">🚁</span>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;">DRON 02</div>
+                <div style="font-size:11px;color:var(--text-secondary);">En misión - Vista Hermosa</div>
+                <div class="battery-bar"><div class="battery-fill mid" style="width:72%"></div></div>
+              </div>
+              <span class="tag tag-green">En vivo</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:var(--bg-secondary);border-radius:6px;padding:8px;">
+              <span style="font-size:18px;">🚁</span>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;">DRON 04</div>
+                <div style="font-size:11px;color:var(--text-secondary);">Sin conexión</div>
+                <div class="battery-bar"><div class="battery-fill low" style="width:5%"></div></div>
+              </div>
+              <span class="tag tag-red">Offline</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: MAPA ===== -->
+  <div class="page" id="page-mapa">
+    <div style="display:flex;flex-direction:column;width:100%;overflow:hidden;">
+      <div class="stats-row">
+        <div class="stat-card green" onclick="navigate('camaras')"><span class="stat-icon">📹</span><div><div class="stat-num">28</div><div class="stat-label">Cámaras en línea</div><div class="stat-sub">de 30</div></div></div>
+        <div class="stat-card blue"><span class="stat-icon">🚁</span><div><div class="stat-num">2</div><div class="stat-label">Drones activos</div><div class="stat-sub">de 3</div></div></div>
+        <div class="stat-card red"><span class="stat-icon">⚠️</span><div><div class="stat-num">3</div><div class="stat-label">Alertas activas</div><div class="stat-sub">incidentes</div></div></div>
+        <div class="stat-card yellow"><span class="stat-icon">🛡️</span><div><div class="stat-num">12</div><div class="stat-label">Zonas seguras</div><div class="stat-sub">zonas</div></div></div>
+      </div>
+      <div class="content-area">
+        <div class="map-container" id="map-container">
+          <canvas id="map-canvas"></canvas>
+
+          <div class="map-search">
+            <span>🔍</span>
+            <input type="text" placeholder="Buscar dirección o cámara..." oninput="filterMapMarkers(this.value)">
+          </div>
+
+          <div class="map-filters">
+            <button class="filter-btn active" onclick="setMapFilter(this,'todas')">Todas</button>
+            <button class="filter-btn" onclick="setMapFilter(this,'camaras')">Cámaras</button>
+            <button class="filter-btn" onclick="setMapFilter(this,'drones')">Drones</button>
+            <button class="filter-btn" onclick="setMapFilter(this,'zonas')">Zonas</button>
+          </div>
+
+          <div class="map-controls">
+            <div class="map-btn" onclick="mapZoom(1)" title="Acercar">+</div>
+            <div class="map-btn" onclick="mapZoom(-1)" title="Alejar">−</div>
+            <div class="map-btn" onclick="centerMap()" title="Centrar">⊕</div>
+            <div class="map-btn" onclick="toggleLayers()" title="Capas">⊞</div>
+          </div>
+
+          <div class="map-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent-green)"></div>Cámara en línea</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent-yellow)"></div>Actividad inusual</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent-red)"></div>Incidente detectado</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent-blue)"></div>Dron activo</div>
+            <div class="legend-item"><div class="legend-dot" style="background:rgba(30,110,247,0.3);border:1px solid var(--accent-blue)"></div>Zona segura</div>
+          </div>
+
+          <div class="map-tooltip" id="map-tooltip"></div>
+        </div>
+
+        <div class="side-panel">
+          <div>
+            <div class="panel-section-title">Cámaras cercanas <span class="see-all" onclick="navigate('camaras')">Ver todas</span></div>
+            <div class="cam-thumbnail" onclick="openCamera('Cam 01 - Av. Principal')">
+              <div class="cam-img"><canvas class="live-canvas" id="ct1"></canvas></div>
+              <div class="cam-info"><div class="cam-name">Cam 01 - Av. Principal</div><div class="cam-status"><div class="status-dot" style="width:6px;height:6px"></div><span style="color:var(--accent-green);font-size:11px">En línea</span></div></div>
+              <span style="color:var(--accent-blue);">▶</span>
+            </div>
+            <div class="cam-thumbnail" onclick="openCamera('Cam 02 - Parque Central')">
+              <div class="cam-img"><canvas class="live-canvas" id="ct2"></canvas></div>
+              <div class="cam-info"><div class="cam-name">Cam 02 - Parque Central</div><div class="cam-status"><div class="status-dot" style="width:6px;height:6px"></div><span style="color:var(--accent-green);font-size:11px">En línea</span></div></div>
+              <span style="color:var(--accent-blue);">▶</span>
+            </div>
+            <div class="cam-thumbnail" onclick="openCamera('Cam 03 - Calle 45')">
+              <div class="cam-img"><canvas class="live-canvas" id="ct3"></canvas></div>
+              <div class="cam-info"><div class="cam-name">Cam 03 - Calle 45</div><div class="cam-status"><span style="color:var(--accent-yellow);font-size:11px">⚠️ Actividad inusual</span></div></div>
+              <span style="color:var(--accent-yellow);">▶</span>
+            </div>
+            <div class="cam-thumbnail" onclick="openCamera('Cam 04 - Los Álamos')">
+              <div class="cam-img"><canvas class="live-canvas" id="ct4"></canvas></div>
+              <div class="cam-info"><div class="cam-name">Cam 04 - Los Álamos</div><div class="cam-status"><div class="status-dot" style="width:6px;height:6px"></div><span style="color:var(--accent-green);font-size:11px">En línea</span></div></div>
+              <span style="color:var(--accent-blue);">▶</span>
+            </div>
+            <div class="cam-thumbnail" onclick="openCamera('Cam 05 - Vista Hermosa')">
+              <div class="cam-img"><canvas class="live-canvas" id="ct5"></canvas></div>
+              <div class="cam-info"><div class="cam-name">Cam 05 - Vista Hermosa</div><div class="cam-status"><span style="color:var(--accent-red);font-size:11px">🔴 Incidente detectado</span></div></div>
+              <span style="color:var(--accent-red);">▶</span>
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="navigate('camaras')">📹 Ver todas las cámaras</button>
+          </div>
+          <div>
+            <div class="panel-section-title">Alertas activas <span class="see-all" onclick="navigate('alertas')">Ver todas</span></div>
+            <div class="alert-item red" onclick="navigate('alertas')">
+              <span>⚠️</span>
+              <div>
+                <div class="alert-item-title">Incidente detectado</div>
+                <div class="alert-item-sub">Cam 05 - Vista Hermosa</div>
+              </div>
+              <span class="alert-item-time">10:24 AM</span>
+            </div>
+            <div class="alert-item yellow" onclick="navigate('alertas')">
+              <span>⚠️</span>
+              <div>
+                <div class="alert-item-title">Actividad inusual</div>
+                <div class="alert-item-sub">Cam 03 - Calle 45</div>
+              </div>
+              <span class="alert-item-time">10:18 AM</span>
+            </div>
+            <div class="alert-item red" onclick="navigate('alertas')">
+              <span>⚠️</span>
+              <div>
+                <div class="alert-item-title">Incidente detectado</div>
+                <div class="alert-item-sub">Cam 07 - Av. Reforma</div>
+              </div>
+              <span class="alert-item-time">10:15 AM</span>
+            </div>
+            <button class="btn btn-danger" style="width:100%;margin-top:4px;" onclick="navigate('alertas')">🔔 Ver todas las alertas</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: CÁMARAS ===== -->
+  <div class="page" id="page-camaras">
+    <div style="display:flex;flex-direction:column;width:100%;overflow:hidden;">
+      <div class="stats-row">
+        <div class="stat-card green"><span class="stat-icon">📹</span><div><div class="stat-num">28</div><div class="stat-label">En línea</div></div></div>
+        <div class="stat-card yellow"><span class="stat-icon">⚠️</span><div><div class="stat-num">2</div><div class="stat-label">Inusuales</div></div></div>
+        <div class="stat-card red"><span class="stat-icon">🔴</span><div><div class="stat-num">1</div><div class="stat-label">Incidentes</div></div></div>
+        <div class="stat-card blue"><span class="stat-icon">📊</span><div><div class="stat-num">30</div><div class="stat-label">Total cámaras</div></div></div>
+      </div>
+      <div class="cams-toolbar">
+        <div class="search-input">
+          <span>🔍</span>
+          <input type="text" placeholder="Buscar cámara..." id="cam-search" oninput="filterCameras(this.value)">
+        </div>
+        <select class="select-input" onchange="filterByZone(this.value)">
+          <option>Todas las zonas</option>
+          <option>Parque Central</option>
+          <option>Col. Centro</option>
+          <option>Col. Vista Hermosa</option>
+          <option>Zona Residencial</option>
+          <option>Entrada Norte</option>
+          <option>Entrada Sur</option>
+        </select>
+        <div class="view-toggle">
+          <div class="view-btn active" onclick="setView('grid',this)" title="Vista cuadrícula">⊞</div>
+          <div class="view-btn" onclick="setView('list',this)" title="Vista lista">☰</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+          <span class="stat-sub" style="color:var(--text-secondary);font-size:12px;align-self:center;">28 en línea &nbsp;·&nbsp; 2 inusuales &nbsp;·&nbsp; 1 incidente</span>
+        </div>
+      </div>
+      <div class="cams-content">
+        <div class="cams-grid" id="cams-grid">
+          <!-- Generated by JS -->
+        </div>
+        <div class="side-panel" style="min-width:260px;width:260px;">
+          <div>
+            <div class="panel-section-title">Ubicación de cámaras</div>
+            <div style="height:160px;background:#080c18;border-radius:8px;border:1px solid var(--border);overflow:hidden;position:relative;margin-bottom:12px;">
+              <canvas id="mini-map-cam" style="width:100%;height:100%;"></canvas>
+            </div>
+            <div style="display:flex;gap:12px;font-size:11px;justify-content:center;">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-green)"></div>En línea</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-yellow)"></div>Actividad inusual</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-red)"></div>Incidente</div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-section-title">Alertas recientes <span class="see-all" onclick="navigate('alertas')">Ver todas</span></div>
+            <div class="alert-item red" onclick="openCamera('Cam 09 - Entrada Sur')">
+              <span>🏃</span><div><div class="alert-item-title">Incidente detectado</div><div class="alert-item-sub">Cam 09 - Entrada Sur <br><span style="color:var(--text-dim)">Hoy</span></div></div><span class="alert-item-time">10:24 AM</span>
+            </div>
+            <div class="alert-item yellow" onclick="openCamera('Cam 03 - Calle Los Álamos')">
+              <span>⚠️</span><div><div class="alert-item-title">Actividad inusual</div><div class="alert-item-sub">Cam 03 - Calle Los Álamos <br><span style="color:var(--text-dim)">Hoy</span></div></div><span class="alert-item-time">10:15 AM</span>
+            </div>
+            <div class="alert-item yellow">
+              <span>⚠️</span><div><div class="alert-item-title">Actividad inusual</div><div class="alert-item-sub">Cam 06 - Parque Infantil <br><span style="color:var(--text-dim)">Hoy</span></div></div><span class="alert-item-time">10:07 AM</span>
+            </div>
+            <div class="alert-item" style="border-left-color:var(--accent-green)">
+              <span>📹</span><div><div class="alert-item-title">Cámara reconectada</div><div class="alert-item-sub">Cam 05 - Entrada Norte <br><span style="color:var(--text-dim)">Hoy</span></div></div><span class="alert-item-time">09:58 AM</span>
+            </div>
+            <button class="btn btn-secondary" style="width:100%;margin-top:8px;" onclick="showToast('Abriendo historial de grabaciones...','info')">📁 Ver historial de grabaciones</button>
+          </div>
+        </div>
+      </div>
+      <div class="pagination">
+        <span>Mostrando 1-9 de 30 cámaras</span>
+        <div class="page-btns">
+          <div class="page-num">‹</div>
+          <div class="page-num active">1</div>
+          <div class="page-num" onclick="showToast('Cargando página 2...','info')">2</div>
+          <div class="page-num" onclick="showToast('Cargando página 3...','info')">3</div>
+          <div class="page-num" onclick="showToast('Cargando página 4...','info')">4</div>
+          <div class="page-num">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: DRONES ===== -->
+  <div class="page" id="page-drones">
+    <div style="display:flex;flex-direction:column;width:100%;overflow:hidden;">
+      <div class="stats-row">
+        <div class="stat-card blue"><span class="stat-icon">🚁</span><div><div class="stat-num">3</div><div class="stat-label">Drones activos</div><div class="stat-sub">de 5</div></div></div>
+        <div class="stat-card green"><span class="stat-icon">🎯</span><div><div class="stat-num">2</div><div class="stat-label">En misión</div><div class="stat-sub">drones</div></div></div>
+        <div class="stat-card yellow"><span class="stat-icon">⏳</span><div><div class="stat-num">1</div><div class="stat-label">En espera</div><div class="stat-sub">dron</div></div></div>
+        <div class="stat-card red"><span class="stat-icon">📡</span><div><div class="stat-num">1</div><div class="stat-label">Sin conexión</div><div class="stat-sub">dron</div></div></div>
+      </div>
+      <div class="drones-content">
+        <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+          <div class="drones-map-area">
+            <canvas id="drone-map-canvas"></canvas>
+            <div class="map-legend" style="bottom:8px;">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-green)"></div>En misión</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-yellow)"></div>En espera</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-red)"></div>Sin conexión</div>
+              <div class="legend-item"><div class="legend-dot" style="background:rgba(244,67,54,0.3)"></div>Zona de alerta</div>
+              <div class="legend-item"><div class="legend-dot" style="background:rgba(30,110,247,0.3)"></div>Zona segura</div>
+            </div>
+            <div class="map-controls" style="bottom:50px;">
+              <div class="map-btn" onclick="mapZoom(1)">+</div>
+              <div class="map-btn" onclick="mapZoom(-1)">−</div>
+              <div class="map-btn" onclick="showToast('Vista 3D activada','info')">3D</div>
+            </div>
+          </div>
+          <div class="drones-bottom">
+            <div class="mission-panel">
+              <div class="panel-title">Misión activa</div>
+              <div class="mission-card">
+                <div class="mission-name">Patrullaje - Sector Norte <span class="tag tag-green">En vivo</span></div>
+                <div class="mission-detail">Objetivo: Vigilancia preventiva</div>
+                <div class="mission-detail">Zona: Parque Central y alrededores</div>
+                <div class="mission-stats">
+                  <div class="mission-stat">
+                    <div class="mission-stat-label">Tiempo transcurrido</div>
+                    <div class="mission-stat-val" id="mission-timer">00:18:42</div>
+                  </div>
+                  <div class="mission-stat">
+                    <div class="mission-stat-label">Distancia recorrida</div>
+                    <div class="mission-stat-val" id="mission-dist">3.2 km</div>
+                  </div>
+                </div>
+                <div class="mission-btns">
+                  <button class="btn btn-danger" onclick="confirmAction('¿Finalizar misión?','Esta acción detendrá el dron y lo regresará a base.','finalizarMision')">Finalizar misión</button>
+                  <button class="btn btn-secondary" onclick="showToast('Misión pausada','warning')">Pausar misión</button>
+                </div>
+              </div>
+            </div>
+            <div class="drone-controls-panel">
+              <div class="panel-title">Controles del dron seleccionado</div>
+              <div style="display:flex;gap:12px;align-items:center;">
+                <div>
+                  <div style="font-size:13px;font-weight:700;margin-bottom:4px;">DRON 01 <span class="tag tag-green">En misión</span></div>
+                  <div style="font-size:12px;color:var(--accent-green);margin-bottom:8px;">🔋 85%</div>
+                  <div class="joystick-grid">
+                    <div></div>
+                    <div class="joystick-btn" onclick="dronMove('arriba')">▲</div>
+                    <div></div>
+                    <div class="joystick-btn" onclick="dronMove('izquierda')">◀</div>
+                    <div class="joystick-btn" style="background:var(--bg-secondary)">●</div>
+                    <div class="joystick-btn" onclick="dronMove('derecha')">▶</div>
+                    <div></div>
+                    <div class="joystick-btn" onclick="dronMove('abajo')">▼</div>
+                    <div></div>
+                  </div>
+                </div>
+                <div class="drone-action-btns">
+                  <div class="drone-act-btn" onclick="dronAction('base')"><span>🏠</span>Volver a base</div>
+                  <div class="drone-act-btn" onclick="dronAction('ruta')"><span>🗺️</span>Seguir ruta</div>
+                  <div class="drone-act-btn" onclick="dronAction('foto')"><span>📸</span>Tomar foto</div>
+                  <div class="drone-act-btn" onclick="dronAction('video')"><span>⏺️</span>Grabar video</div>
+                  <div class="drone-act-btn" onclick="dronAction('zoom+')"><span>🔍</span>Zoom +</div>
+                  <div class="drone-act-btn" onclick="dronAction('zoom-')"><span>🔍</span>Zoom −</div>
+                  <div class="drone-act-btn" onclick="dronAction('luz')"><span>💡</span>Luz</div>
+                  <div class="drone-act-btn" onclick="dronAction('bocina')"><span>📢</span>Bocina</div>
+                  <div class="drone-act-btn" onclick="dronAction('sos')"><span>🆘</span>SOS</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--accent-green);margin-top:8px;">📶 Conexión estable</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="drones-right">
+          <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);">Lista de drones</span>
+            <button class="btn btn-primary" style="padding:5px 12px;font-size:12px;" onclick="showToast('Agregando nuevo dron...','info')">+ Agregar dron</button>
+          </div>
+          <div class="drones-list">
+            <div class="drone-list-item selected" onclick="selectDrone(this,'DRON 01')">
+              <div class="drone-thumb">🚁</div>
+              <div class="drone-info">
+                <div class="drone-name">DRON 01</div>
+                <div class="drone-status-text">En misión - Siguiendo ruta</div>
+                <div class="drone-status-text">Zona: Parque Central</div>
+                <div class="battery-bar"><div class="battery-fill high" style="width:85%"></div></div>
+                <div style="font-size:10px;color:var(--accent-green);">🔋 85%</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                <span class="tag tag-green">En vivo</span>
+                <div class="live-ctrl-btn" onclick="event.stopPropagation();showToast('Abriendo vista en vivo DRON 01','info')">▶</div>
+              </div>
+            </div>
+            <div class="drone-list-item" onclick="selectDrone(this,'DRON 02')">
+              <div class="drone-thumb">🚁</div>
+              <div class="drone-info">
+                <div class="drone-name">DRON 02</div>
+                <div class="drone-status-text">En misión - Patrullaje</div>
+                <div class="drone-status-text">Zona: Col. Vista Hermosa</div>
+                <div class="battery-bar"><div class="battery-fill mid" style="width:72%"></div></div>
+                <div style="font-size:10px;color:var(--accent-yellow);">🔋 72%</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                <span class="tag tag-green">En vivo</span>
+                <div class="live-ctrl-btn" onclick="event.stopPropagation();showToast('Abriendo vista en vivo DRON 02','info')">▶</div>
+              </div>
+            </div>
+            <div class="drone-list-item" onclick="selectDrone(this,'DRON 03')">
+              <div class="drone-thumb" style="filter:grayscale(0.5)">🚁</div>
+              <div class="drone-info">
+                <div class="drone-name">DRON 03</div>
+                <div class="drone-status-text">En espera</div>
+                <div class="drone-status-text">Base: Centro de Monitoreo</div>
+                <div class="battery-bar"><div class="battery-fill high" style="width:100%"></div></div>
+                <div style="font-size:10px;color:var(--accent-green);">🔋 100%</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                <span class="tag tag-yellow">En espera</span>
+                <div class="live-ctrl-btn" onclick="event.stopPropagation();assignMission()">▶</div>
+              </div>
+            </div>
+            <div class="drone-list-item" onclick="selectDrone(this,'DRON 04')">
+              <div class="drone-thumb" style="filter:grayscale(1)">🚁</div>
+              <div class="drone-info">
+                <div class="drone-name">DRON 04</div>
+                <div class="drone-status-text" style="color:var(--accent-red)">Sin conexión</div>
+                <div class="drone-status-text">Última señal: 09:15 AM</div>
+                <div class="battery-bar"><div class="battery-fill low" style="width:2%"></div></div>
+                <div style="font-size:10px;color:var(--accent-red);">🔋 --%</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                <span class="tag tag-red">Sin conexión</span>
+                <div class="live-ctrl-btn" style="opacity:0.4;cursor:not-allowed">▶</div>
+              </div>
+            </div>
+            <div class="drone-list-item" onclick="selectDrone(this,'DRON 05')">
+              <div class="drone-thumb">🚁</div>
+              <div class="drone-info">
+                <div class="drone-name">DRON 05</div>
+                <div class="drone-status-text">En espera</div>
+                <div class="drone-status-text">Base: Centro de Monitoreo</div>
+                <div class="battery-bar"><div class="battery-fill high" style="width:100%"></div></div>
+                <div style="font-size:10px;color:var(--accent-green);">🔋 100%</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                <span class="tag tag-yellow">En espera</span>
+                <div class="live-ctrl-btn" onclick="event.stopPropagation();assignMission()">▶</div>
+              </div>
+            </div>
+            <button class="btn btn-secondary" style="width:100%;margin-top:8px;" onclick="showToast('Abriendo historial de misiones...','info')">📋 Ver historial de misiones</button>
+          </div>
+
+          <div>
+            <div style="padding:0 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:6px;">Vista en vivo - DRON 01 <span class="tag tag-green" style="font-size:9px;">En vivo</span></div>
+            <div class="live-view">
+              <canvas id="drone-live-canvas"></canvas>
+              <div class="live-label">DRON 01 - Parque Central</div>
+              <div class="live-tag">EN VIVO</div>
+            </div>
+            <div style="padding:0 12px 8px;font-size:11px;color:var(--text-secondary);display:flex;justify-content:space-between;">
+              <span>Resolución: 1080p</span><span>Zoom: 1.0x</span><span style="color:var(--accent-green)">● Estabilización</span>
+            </div>
+            <div class="live-controls">
+              <div class="live-ctrl-btn" onclick="showToast('Capturando pantalla...','success')">📸</div>
+              <div class="live-ctrl-btn" onclick="showToast('Grabando video...','info')">⏺️</div>
+              <div class="live-ctrl-btn" onclick="showToast('Audio activado','info')">🎙️</div>
+              <div class="live-ctrl-btn" onclick="showToast('Sonido activado','info')">🔊</div>
+              <div class="live-ctrl-btn" onclick="showToast('Pantalla completa','info')">⛶</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: ALERTAS ===== -->
+  <div class="page" id="page-alertas">
+    <div style="display:flex;flex-direction:column;width:100%;overflow:hidden;">
+      <div class="stats-row">
+        <div class="stat-card red" onclick="filterAlertsByType('todas')"><span class="stat-icon">🔔</span><div><div class="stat-num">18</div><div class="stat-label">Todas las alertas</div><div class="see-all" style="font-size:11px;margin-top:2px;">Ver todas</div></div></div>
+        <div class="stat-card red" onclick="filterAlertsByType('incidente')"><span class="stat-icon">🏃</span><div><div class="stat-num">7</div><div class="stat-label">Incidentes</div><div class="see-all" style="font-size:11px;margin-top:2px;">Ver incidentes</div></div></div>
+        <div class="stat-card yellow" onclick="filterAlertsByType('inusual')"><span class="stat-icon">⚠️</span><div><div class="stat-num">6</div><div class="stat-label">Actividad inusual</div><div class="see-all" style="font-size:11px;margin-top:2px;">Ver inusuales</div></div></div>
+        <div class="stat-card purple" style="--accent-purple:#9c27b0;" onclick="filterAlertsByType('ciudadano')"><span class="stat-icon" style="color:#9c27b0">👥</span><div><div class="stat-num" style="color:#9c27b0">5</div><div class="stat-label">Reportes ciudadanos</div><div class="see-all" style="font-size:11px;margin-top:2px;">Ver reportes</div></div></div>
+      </div>
+      <div class="alertas-content">
+        <div class="alertas-list-area">
+          <div class="alertas-toolbar">
+            <div class="search-input" style="max-width:220px;">
+              <span>🔍</span>
+              <input type="text" placeholder="Buscar alerta..." oninput="filterAlertsSearch(this.value)">
+            </div>
+            <select class="select-input" onchange="showToast('Filtrando por prioridad: '+this.value,'info')">
+              <option>Todas las prioridades</option>
+              <option>Alta</option>
+              <option>Media</option>
+              <option>Baja</option>
+            </select>
+            <select class="select-input" onchange="showToast('Filtrando por zona: '+this.value,'info')">
+              <option>Todas las zonas</option>
+              <option>Zona Norte</option>
+              <option>Zona Centro</option>
+              <option>Zona Sur</option>
+              <option>Zona Este</option>
+            </select>
+            <select class="select-input" onchange="showToast('Filtrando por fecha','info')">
+              <option>Hoy, 20 de mayo</option>
+              <option>Ayer</option>
+              <option>Últimos 7 días</option>
+            </select>
+            <div class="map-btn" onclick="showToast('Más filtros disponibles','info')" style="width:36px;height:36px;">⚙</div>
+          </div>
+          <div class="alertas-table">
+            <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:12px;">Lista de alertas</div>
+            <table id="alertas-table">
+              <thead>
+                <tr>
+                  <th>Prioridad</th>
+                  <th>Tipo</th>
+                  <th>Descripción</th>
+                  <th>Ubicación</th>
+                  <th>Hora</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="alertas-tbody">
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span id="alert-count-text">Mostrando 1 a 8 de 18 alertas</span>
+            <div class="page-btns">
+              <div class="page-num">‹</div>
+              <div class="page-num active">1</div>
+              <div class="page-num" onclick="showToast('Cargando página 2...','info')">2</div>
+              <div class="page-num" onclick="showToast('Cargando página 3...','info')">3</div>
+              <div class="page-num">›</div>
+            </div>
+            <select class="select-input" style="font-size:12px;" onchange="showToast('Mostrando '+this.value+' por página','info')">
+              <option>10 por página</option>
+              <option>25 por página</option>
+              <option>50 por página</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="alertas-detail" id="alert-detail">
+          <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+            Detalle de alerta
+            <span class="tag tag-red">Incidente</span>
+          </div>
+          <div class="detail-header">
+            <div class="detail-icon">🏃</div>
+            <div>
+              <div class="detail-title" id="detail-title">Movimiento sospechoso</div>
+              <div class="detail-source" id="detail-source">Detectado por Cam 03</div>
+            </div>
+          </div>
+          <div class="detail-section-title">Información</div>
+          <div class="detail-row"><span class="detail-label">Prioridad:</span><span class="detail-val" style="color:var(--accent-red);">● Alta</span></div>
+          <div class="detail-row"><span class="detail-label">Estado:</span><span class="tag tag-red">Activa</span></div>
+          <div class="detail-row"><span class="detail-label">Ubicación:</span><span class="detail-val" id="detail-loc">Av. Principal 123, Los Álamos</span></div>
+          <div class="detail-row"><span class="detail-label">Fecha y hora:</span><span class="detail-val">20/05/2026 – 10:24 AM</span></div>
+          <div class="detail-row"><span class="detail-label">Fuente:</span><span class="detail-val">Cámara de seguridad</span></div>
+          <div class="detail-row"><span class="detail-label">ID de alerta:</span><span class="detail-val" style="color:var(--text-dim);">ALT-2026-0001</span></div>
+
+          <div class="detail-section-title" style="margin-top:14px;">Vista de cámara</div>
+          <div class="cam-live-detail">
+            <canvas id="detail-cam-canvas" style="width:100%;height:100%;"></canvas>
+            <div class="live-label">Cam 03 - Av. Principal</div>
+            <div class="live-tag">EN VIVO</div>
+            <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:8px;">
+              <div class="live-ctrl-btn" onclick="showToast('Reproduciendo grabación','info')" style="width:28px;height:28px;font-size:12px;">▶</div>
+              <div class="live-ctrl-btn" onclick="showToast('Capturando imagen','success')" style="width:28px;height:28px;font-size:12px;">📸</div>
+              <div class="live-ctrl-btn" onclick="showToast('Descargando video','info')" style="width:28px;height:28px;font-size:12px;">⬇</div>
+              <div class="live-ctrl-btn" onclick="showToast('Pantalla completa','info')" style="width:28px;height:28px;font-size:12px;">⛶</div>
+            </div>
+          </div>
+
+          <div class="detail-section-title">Ubicación en el mapa</div>
+          <div style="height:100px;background:#080c18;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;position:relative;">
+            <canvas id="detail-mini-map" style="width:100%;height:100%;"></canvas>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;">📍</div>
+          </div>
+
+          <div class="detail-section-title">Acciones rápidas</div>
+          <div class="quick-actions">
+            <div class="quick-btn patrulla" onclick="enviarPatrulla()">🚓 Enviar a patrulla</div>
+            <div class="quick-btn compartir" onclick="showToast('Alerta compartida con el equipo','success')">↗ Compartir alerta</div>
+            <div class="quick-btn cerrar" onclick="cerrarAlerta()">✓ Cerrar alerta</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: REPORTES ===== -->
+  <div class="page" id="page-reportes">
+    <div style="flex:1;padding:24px;overflow-y:auto;">
+      <div style="max-width:900px;">
+        <div style="font-size:22px;font-family:Rajdhani,sans-serif;font-weight:700;margin-bottom:6px;">GENERADOR DE REPORTES</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;">Cree y descargue reportes de seguridad personalizados</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;">
+          <div class="dash-card" style="cursor:pointer;" onclick="showToast('Generando reporte diario...','info')">
+            <div style="font-size:32px;margin-bottom:12px;">📊</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Reporte Diario</div>
+            <div style="font-size:12px;color:var(--text-secondary);">Resumen de actividad de las últimas 24 horas</div>
+            <button class="btn btn-primary" style="margin-top:12px;width:100%;">Generar</button>
+          </div>
+          <div class="dash-card" style="cursor:pointer;" onclick="showToast('Generando reporte de incidentes...','info')">
+            <div style="font-size:32px;margin-bottom:12px;">🔴</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Reporte de Incidentes</div>
+            <div style="font-size:12px;color:var(--text-secondary);">Detalle de todos los incidentes del período</div>
+            <button class="btn btn-danger" style="margin-top:12px;width:100%;">Generar</button>
+          </div>
+          <div class="dash-card" style="cursor:pointer;" onclick="showToast('Generando reporte de drones...','info')">
+            <div style="font-size:32px;margin-bottom:12px;">🚁</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Reporte de Drones</div>
+            <div style="font-size:12px;color:var(--text-secondary);">Historial de misiones y estadísticas de vuelo</div>
+            <button class="btn btn-secondary" style="margin-top:12px;width:100%;">Generar</button>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title" style="margin-bottom:16px;">Reportes recientes</div>
+          <table style="width:100%;">
+            <thead><tr><th>Reporte</th><th>Período</th><th>Generado</th><th>Tamaño</th><th></th></tr></thead>
+            <tbody>
+              <tr onclick="showToast('Descargando reporte...','success')"><td>Reporte Diario - 20 mayo</td><td>24h</td><td>10:00 AM</td><td>2.4 MB</td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px;">⬇ Descargar</button></td></tr>
+              <tr onclick="showToast('Descargando reporte...','success')"><td>Reporte Incidentes - sem 20</td><td>7 días</td><td>Ayer</td><td>5.1 MB</td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px;">⬇ Descargar</button></td></tr>
+              <tr onclick="showToast('Descargando reporte...','success')"><td>Reporte Drones - mayo</td><td>30 días</td><td>1 mayo</td><td>8.3 MB</td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px;">⬇ Descargar</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: HISTORIAL ===== -->
+  <div class="page" id="page-historial">
+    <div style="flex:1;padding:24px;overflow-y:auto;">
+      <div style="font-size:22px;font-family:Rajdhani,sans-serif;font-weight:700;margin-bottom:6px;">HISTORIAL DEL SISTEMA</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;">Registro de eventos y actividades del centro de monitoreo</div>
+      <div style="display:flex;gap:12px;margin-bottom:16px;">
+        <div class="search-input"><span>🔍</span><input type="text" placeholder="Buscar en historial..."></div>
+        <select class="select-input"><option>Todos los eventos</option><option>Alertas</option><option>Cámaras</option><option>Drones</option><option>Sistema</option></select>
+        <select class="select-input"><option>Hoy</option><option>Ayer</option><option>Esta semana</option><option>Este mes</option></select>
+      </div>
+      <div class="dash-card" style="padding:0;overflow:hidden;">
+        <table style="width:100%;">
+          <thead><tr><th>Hora</th><th>Tipo</th><th>Evento</th><th>Fuente</th><th>Estado</th></tr></thead>
+          <tbody id="historial-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: CONFIGURACION ===== -->
+  <div class="page" id="page-configuracion">
+    <div style="flex:1;padding:24px;overflow-y:auto;">
+      <div style="font-size:22px;font-family:Rajdhani,sans-serif;font-weight:700;margin-bottom:6px;">CONFIGURACIÓN DEL SISTEMA</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;">Administre las preferencias del centro de monitoreo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px;">
+        <div class="dash-card">
+          <div class="dash-card-title" style="margin-bottom:16px;">🔔 Notificaciones</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <label style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span style="font-size:13px;">Alertas de incidentes</span>
+              <input type="checkbox" checked onchange="showToast('Configuración guardada','success')" style="width:16px;height:16px;cursor:pointer;">
+            </label>
+            <label style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span style="font-size:13px;">Actividad inusual</span>
+              <input type="checkbox" checked onchange="showToast('Configuración guardada','success')" style="width:16px;height:16px;cursor:pointer;">
+            </label>
+            <label style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span style="font-size:13px;">Reportes ciudadanos</span>
+              <input type="checkbox" onchange="showToast('Configuración guardada','success')" style="width:16px;height:16px;cursor:pointer;">
+            </label>
+            <label style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span style="font-size:13px;">Alertas de drones</span>
+              <input type="checkbox" checked onchange="showToast('Configuración guardada','success')" style="width:16px;height:16px;cursor:pointer;">
+            </label>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title" style="margin-bottom:16px;">📹 Cámaras</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Resolución por defecto</div>
+              <select class="select-input" style="width:100%;" onchange="showToast('Resolución actualizada: '+this.value,'success')"><option>1080p HD</option><option>720p</option><option>4K Ultra HD</option></select>
+            </div>
+            <div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Retención de grabaciones</div>
+              <select class="select-input" style="width:100%;" onchange="showToast('Retención actualizada','success')"><option>30 días</option><option>60 días</option><option>90 días</option></select>
+            </div>
+            <label style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span style="font-size:13px;">Detección de movimiento</span>
+              <input type="checkbox" checked onchange="showToast('Detección de movimiento: '+(this.checked?'activada':'desactivada'),'success')" style="width:16px;height:16px;cursor:pointer;">
+            </label>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title" style="margin-bottom:16px;">🚁 Drones</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Batería mínima para alerta</div>
+              <input type="range" min="5" max="30" value="20" style="width:100%;cursor:pointer;" oninput="showToast('Batería mínima: '+this.value+'%','info')">
+            </div>
+            <label style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span style="font-size:13px;">Retorno automático a base</span>
+              <input type="checkbox" checked onchange="showToast('Retorno automático: '+(this.checked?'activado':'desactivado'),'success')" style="width:16px;height:16px;cursor:pointer;">
+            </label>
+            <label style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+              <span style="font-size:13px;">Modo nocturno</span>
+              <input type="checkbox" onchange="showToast('Modo nocturno: '+(this.checked?'activado':'desactivado'),'success')" style="width:16px;height:16px;cursor:pointer;">
+            </label>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title" style="margin-bottom:16px;">👤 Cuenta</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Nombre</div><input type="text" value="Administrador" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text-primary);font-size:13px;width:100%;outline:none;"></div>
+            <div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Email</div><input type="email" value="admin@seguridad.pe" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text-primary);font-size:13px;width:100%;outline:none;"></div>
+            <button class="btn btn-primary" onclick="showToast('Perfil actualizado correctamente','success')">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-overlay" id="notif-overlay" onclick="closeNotif(event)">
+  <div class="notif-panel">
+    <div class="notif-header">
+      Notificaciones
+      <span style="font-size:12px;color:var(--accent-blue);cursor:pointer;" onclick="markAllRead()">Marcar todo como leído</span>
+    </div>
+    <div class="notif-list">
+      <div class="notif-item unread" onclick="notifClick('alertas')"><span class="notif-icon">🔴</span><div class="notif-text"><strong>Incidente detectado</strong><br><span style="color:var(--text-secondary)">Cam 05 - Vista Hermosa</span><div class="notif-time">10:24 AM</div></div></div>
+      <div class="notif-item unread" onclick="notifClick('alertas')"><span class="notif-icon">⚠️</span><div class="notif-text"><strong>Actividad inusual</strong><br><span style="color:var(--text-secondary)">Cam 03 - Calle 45</span><div class="notif-time">10:18 AM</div></div></div>
+      <div class="notif-item unread" onclick="notifClick('drones')"><span class="notif-icon">🚁</span><div class="notif-text"><strong>DRON 04 sin conexión</strong><br><span style="color:var(--text-secondary)">Última señal 09:15 AM</span><div class="notif-time">09:15 AM</div></div></div>
+      <div class="notif-item" onclick="notifClick('alertas')"><span class="notif-icon">🏃</span><div class="notif-text"><strong>Posible robo detectado</strong><br><span style="color:var(--text-secondary)">Cam 05 - Calle 45</span><div class="notif-time">09:42 AM</div></div></div>
+      <div class="notif-item" onclick="notifClick('camaras')"><span class="notif-icon">📹</span><div class="notif-text"><strong>Cámara reconectada</strong><br><span style="color:var(--text-secondary)">Cam 05 - Entrada Norte</span><div class="notif-time">09:58 AM</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Confirmar acción</div>
+    <div class="modal-body" id="modal-body">¿Está seguro?</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" id="modal-confirm-btn" onclick="executeModalAction()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- CAMERA MODAL -->
+<div class="modal-overlay" id="cam-modal-overlay">
+  <div class="modal" style="max-width:700px;width:95%;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="modal-title" id="cam-modal-title">Cámara en vivo</div>
+      <div style="display:flex;gap:8px;">
+        <span class="tag tag-green">En línea</span>
+        <button class="btn btn-secondary" onclick="closeModal('cam')" style="padding:4px 10px;font-size:12px;">✕ Cerrar</button>
+      </div>
+    </div>
+    <div style="height:320px;background:#080c18;border-radius:8px;position:relative;overflow:hidden;border:1px solid var(--border);">
+      <canvas id="cam-modal-canvas" style="width:100%;height:100%;"></canvas>
+      <div class="live-tag">EN VIVO</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:center;">
+      <button class="btn btn-secondary" onclick="showToast('Grabando video...','info')">⏺️ Grabar</button>
+      <button class="btn btn-secondary" onclick="showToast('Imagen capturada','success')">📸 Captura</button>
+      <button class="btn btn-secondary" onclick="showToast('Zoom aumentado','info')">🔍 Zoom +</button>
+      <button class="btn btn-danger" onclick="showToast('Patrulla enviada a la ubicación','success')">🚓 Enviar patrulla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===========================
+// STATE
+// ===========================
+let currentPage = 'inicio';
+let mapFilter = 'todas';
+let pendingAction = null;
+let animFrames = {};
+let missionSeconds = 1122;
+let alertBadgeCount = 5;
+let selectedAlertRow = null;
+
+// ===========================
+// NAVIGATION
+// ===========================
+const pageConfig = {
+  inicio: { title: 'INICIO', subtitle: 'Panel principal del centro de monitoreo' },
+  camaras: { title: 'CÁMARAS EN VIVO', subtitle: 'Monitoreo en tiempo real de todas las cámaras conectadas' },
+  mapa: { title: 'MAPA DE VIGILANCIA', subtitle: 'Visualización en tiempo real de cámaras, drones y zonas de seguridad' },
+  drones: { title: 'DRONES', subtitle: 'Monitoreo y control de drones en tiempo real' },
+  alertas: { title: 'ALERTAS', subtitle: 'Monitoreo y gestión de alertas en tiempo real' },
+  reportes: { title: 'REPORTES', subtitle: 'Generación y descarga de reportes del sistema' },
+  historial: { title: 'HISTORIAL', subtitle: 'Registro de eventos y actividades del sistema' },
+  configuracion: { title: 'CONFIGURACIÓN', subtitle: 'Administración del sistema de seguridad' },
+};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+  const cfg = pageConfig[page];
+  document.getElementById('page-title').textContent = cfg.title;
+  document.getElementById('page-subtitle').textContent = cfg.subtitle;
+  currentPage = page;
+  closeNotif();
+
+  // Init page
+  if (page === 'mapa') initMapCanvas();
+  if (page === 'drones') { initDroneMap(); initDroneLiveCanvas(); }
+  if (page === 'camaras') { initCamsGrid(); initMiniMapCam(); }
+  if (page === 'alertas') initAlertasTable();
+  if (page === 'historial') initHistorial();
+  if (page === 'inicio') initActivityChart();
+}
+
+// ===========================
+// CLOCK
+// ===========================
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = ((h % 12) || 12);
+  document.getElementById('clock').textContent = `${h12}:${m} ${ampm}`;
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('clock-date').textContent = `${now.getDate()} de ${months[now.getMonth()]}, ${now.getFullYear()}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===========================
+// MISSION TIMER
+// ===========================
+setInterval(() => {
+  missionSeconds++;
+  const h = Math.floor(missionSeconds / 3600);
+  const m = String(Math.floor((missionSeconds % 3600) / 60)).padStart(2, '0');
+  const s = String(missionSeconds % 60).padStart(2, '0');
+  const el = document.getElementById('mission-timer');
+  if (el) el.textContent = `${String(h).padStart(2,'0')}:${m}:${s}`;
+}, 1000);
+
+// ===========================
+// TOAST
+// ===========================
+function showToast(msg, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+    toast.style.transition = 'all 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// ===========================
+// MODAL
+// ===========================
+function confirmAction(title, body, action) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = body;
+  pendingAction = action;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(type) {
+  if (type === 'cam') {
+    document.getElementById('cam-modal-overlay').classList.remove('open');
+  } else {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+function executeModalAction() {
+  closeModal();
+  if (pendingAction === 'finalizarMision') {
+    showToast('Misión finalizada. Dron retornando a base.', 'success');
+  }
+}
+
+// ===========================
+// NOTIFICATIONS
+// ===========================
+function toggleNotif() {
+  document.getElementById('notif-overlay').classList.toggle('open');
+}
+
+function closeNotif(e) {
+  if (!e || !e.target.closest('.notif-panel')) {
+    document.getElementById('notif-overlay').classList.remove('open');
+  }
+}
+
+function markAllRead() {
+  document.querySelectorAll('.notif-item.unread').forEach(n => n.classList.remove('unread'));
+  alertBadgeCount = 0;
+  document.getElementById('topbar-badge').textContent = '0';
+  document.getElementById('nav-badge').textContent = '0';
+  document.getElementById('stat-alertas').textContent = '0';
+  showToast('Todas las notificaciones marcadas como leídas', 'success');
+}
+
+function notifClick(page) {
+  document.getElementById('notif-overlay').classList.remove('open');
+  navigate(page);
+}
+
+// ===========================
+// MAP CANVAS
+// ===========================
+function initMapCanvas() {
+  const container = document.getElementById('map-container');
+  const canvas = document.getElementById('map-canvas');
+  if (!canvas) return;
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  drawMap(ctx, canvas.width, canvas.height);
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    checkMapHover(x, y, e);
+  });
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    handleMapClick(x, y);
+  });
+}
+
+const mapMarkers = [
+  { x: 0.35, y: 0.27, type: 'drone', label: 'DRON 01', sub: 'En misión · 85%' },
+  { x: 0.48, y: 0.30, type: 'incident', label: 'Incidente', sub: 'Cam 05 – Vista Hermosa' },
+  { x: 0.30, y: 0.48, type: 'camera', label: 'Cám 04', sub: 'En línea' },
+  { x: 0.38, y: 0.55, type: 'camera', label: 'Cám 06', sub: 'En línea' },
+  { x: 0.56, y: 0.42, type: 'camera', label: 'Cám 07', sub: 'En línea' },
+  { x: 0.67, y: 0.24, type: 'unusual', label: 'Cám 03', sub: 'Actividad inusual' },
+  { x: 0.44, y: 0.65, type: 'drone', label: 'DRON 02', sub: 'En misión · 72%' },
+  { x: 0.63, y: 0.55, type: 'camera', label: 'Cám 08', sub: 'En línea' },
+  { x: 0.75, y: 0.55, type: 'camera', label: 'Cám 09', sub: 'En línea' },
+  { x: 0.30, y: 0.75, type: 'camera', label: 'Cám 10', sub: 'En línea' },
+  { x: 0.60, y: 0.75, type: 'incident', label: 'Incidente', sub: 'Cam 09 – Entrada Sur' },
+  { x: 0.52, y: 0.20, type: 'camera', label: 'Cám 01', sub: 'En línea' },
+];
+
+function drawMap(ctx, w, h) {
+  // Background
+  ctx.fillStyle = '#080c18';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(30,110,247,0.08)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < w; i += 40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
+  for (let i = 0; i < h; i += 40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
+
+  // Roads
+  const roads = [
+    { x1: 0, y1: 0.22, x2: 1, y2: 0.22 }, // horizontal top
+    { x1: 0, y1: 0.52, x2: 1, y2: 0.52 }, // horizontal mid
+    { x1: 0, y1: 0.78, x2: 1, y2: 0.78 }, // horizontal bottom
+    { x1: 0.22, y1: 0, x2: 0.22, y2: 1 }, // vertical left
+    { x1: 0.50, y1: 0, x2: 0.50, y2: 1 }, // vertical mid
+    { x1: 0.74, y1: 0, x2: 0.74, y2: 1 }, // vertical right
+    { x1: 0, y1: 0.38, x2: 0.50, y2: 0.38 }, // diag
+    { x1: 0.50, y1: 0.38, x2: 1, y2: 0.25 },
+  ];
+
+  roads.forEach(r => {
+    ctx.strokeStyle = '#1a2540';
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(r.x1 * w, r.y1 * h);
+    ctx.lineTo(r.x2 * w, r.y2 * h);
+    ctx.stroke();
+    ctx.strokeStyle = '#232e4a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Zones
+  drawZone(ctx, w, h, 0.28, 0.58, 0.18, 0.22, 'rgba(0,200,83,0.08)', 'rgba(0,200,83,0.3)', 'PARQUE\nCENTRAL');
+  drawZoneRect(ctx, w, h, 0.56, 0.35, 0.24, 0.25, 'rgba(30,110,247,0.08)', 'rgba(30,110,247,0.3)', 'ZONA\nESCOLAR');
+
+  // Zone labels
+  drawZoneLabel(ctx, w, h, 0.18, 0.12, 'COL. CENTRO');
+  drawZoneLabel(ctx, w, h, 0.52, 0.12, 'PARQUE CENTRAL');
+  drawZoneLabel(ctx, w, h, 0.78, 0.15, 'COL. SAN MIGUEL');
+  drawZoneLabel(ctx, w, h, 0.52, 0.45, 'COL. VISTA\nHERMOSA');
+  drawZoneLabel(ctx, w, h, 0.38, 0.58, 'COL. DEL\nROSQUE');
+  drawZoneLabel(ctx, w, h, 0.80, 0.62, 'COL. LA PAZ\nLASQUE');
+  drawZoneLabel(ctx, w, h, 0.25, 0.82, 'COL. EL BOSQUE');
+
+  // Drone path
+  ctx.strokeStyle = 'rgba(30,110,247,0.5)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0.35 * w, 0.27 * h);
+  ctx.lineTo(0.30 * w, 0.48 * h);
+  ctx.lineTo(0.38 * w, 0.55 * h);
+  ctx.lineTo(0.44 * w, 0.65 * h);
+  ctx.lineTo(0.55 * w, 0.72 * h);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Markers
+  mapMarkers.forEach(m => {
+    if (mapFilter !== 'todas') {
+      if (mapFilter === 'camaras' && m.type !== 'camera' && m.type !== 'unusual' && m.type !== 'incident') return;
+      if (mapFilter === 'drones' && m.type !== 'drone') return;
+      if (mapFilter === 'zonas') return;
+    }
+    drawMapMarker(ctx, m.x * w, m.y * h, m.type);
+  });
+}
+
+function drawZone(ctx, w, h, cx, cy, rw, rh, fill, stroke, label) {
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo((cx - rw/2) * w, cy * h);
+  ctx.lineTo(cx * w, (cy - rh/2) * h);
+  ctx.lineTo((cx + rw/2) * w, cy * h);
+  ctx.lineTo(cx * w, (cy + rh/2) * h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawZoneRect(ctx, w, h, cx, cy, rw, rh, fill, stroke, label) {
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.rect((cx - rw/2) * w, (cy - rh/2) * h, rw * w, rh * h);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(30,110,247,0.7)';
+  ctx.font = '11px Inter';
+  ctx.textAlign = 'center';
+  const lines = label.split('\n');
+  lines.forEach((l, i) => ctx.fillText(l, cx * w, (cy + (i - lines.length/2 + 0.5) * 0.04) * h));
+}
+
+function drawZoneLabel(ctx, w, h, cx, cy, label) {
+  ctx.fillStyle = 'rgba(138,150,179,0.6)';
+  ctx.font = '11px Inter';
+  ctx.textAlign = 'center';
+  const lines = label.split('\n');
+  lines.forEach((l, i) => ctx.fillText(l, cx * w, cy * h + i * 14));
+}
+
+function drawMapMarker(ctx, x, y, type) {
+  const colors = { camera: '#00c853', unusual: '#ffc107', incident: '#f44336', drone: '#1e6ef7' };
+  const emojis = { camera: '📹', unusual: '📹', incident: '📹', drone: '🚁' };
+  const color = colors[type] || '#fff';
+
+  if (type === 'incident') {
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(244,67,54,0.15)';
+    ctx.fill();
+  }
+
+  ctx.beginPath();
+  ctx.arc(x, y, 14, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.font = '12px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emojis[type], x, y);
+  ctx.textBaseline = 'alphabetic';
+}
+
+function checkMapHover(x, y, e) {
+  const canvas = document.getElementById('map-canvas');
+  const tooltip = document.getElementById('map-tooltip');
+  const w = canvas.width, h = canvas.height;
+  let found = false;
+  for (const m of mapMarkers) {
+    const mx = m.x * w, my = m.y * h;
+    const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2);
+    if (dist < 20) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.offsetX + 15) + 'px';
+      tooltip.style.top = (e.offsetY - 20) + 'px';
+      tooltip.innerHTML = `<strong>${m.label}</strong><br><span style="color:var(--text-secondary)">${m.sub}</span>`;
+      canvas.style.cursor = 'pointer';
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    tooltip.style.display = 'none';
+    canvas.style.cursor = 'default';
+  }
+}
+
+function handleMapClick(x, y) {
+  const canvas = document.getElementById('map-canvas');
+  const w = canvas.width, h = canvas.height;
+  for (const m of mapMarkers) {
+    const mx = m.x * w, my = m.y * h;
+    const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2);
+    if (dist < 20) {
+      if (m.type === 'drone') showToast(`${m.label}: ${m.sub}`, 'info');
+      else if (m.type === 'incident') { showToast(`⚠️ Incidente: ${m.sub}`, 'error'); navigate('alertas'); }
+      else if (m.type === 'unusual') { showToast(`⚠️ Actividad inusual: ${m.sub}`, 'warning'); }
+      else openCamera(m.label);
+      break;
+    }
+  }
+}
+
+function setMapFilter(btn, filter) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  mapFilter = filter;
+  const canvas = document.getElementById('map-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    drawMap(ctx, canvas.width, canvas.height);
+  }
+  showToast(`Mostrando: ${filter}`, 'info');
+}
+
+let mapScale = 1;
+function mapZoom(dir) {
+  mapScale = Math.max(0.5, Math.min(3, mapScale + dir * 0.2));
+  showToast(`Zoom: ${Math.round(mapScale * 100)}%`, 'info');
+}
+function centerMap() { showToast('Mapa centrado', 'info'); }
+function toggleLayers() { showToast('Capas actualizadas', 'info'); }
+function filterMapMarkers(val) { if (!val) return; showToast(`Buscando: "${val}"`, 'info'); }
+
+// ===========================
+// CAMERAS GRID
+// ===========================
+const camsData = [
+  { id: 'Cam 01', name: 'Parque Central', zone: 'Parque Central', status: 'online' },
+  { id: 'Cam 02', name: 'Av. Principal', zone: 'Av. Principal', status: 'online' },
+  { id: 'Cam 03', name: 'Calle Los Álamos', zone: 'Calle Los Álamos', status: 'unusual' },
+  { id: 'Cam 04', name: 'Zona Residencial', zone: 'Zona Residencial', status: 'online' },
+  { id: 'Cam 05', name: 'Entrada Norte', zone: 'Entrada Norte', status: 'online' },
+  { id: 'Cam 06', name: 'Parque Infantil', zone: 'Parque Infantil', status: 'unusual' },
+  { id: 'Cam 07', name: 'Calle San Martín', zone: 'Calle San Martín', status: 'online' },
+  { id: 'Cam 08', name: 'Estacionamiento', zone: 'Estacionamiento Sur', status: 'online' },
+  { id: 'Cam 09', name: 'Entrada Sur', zone: 'Entrada Sur', status: 'incident' },
+];
+
+function initCamsGrid() {
+  const grid = document.getElementById('cams-grid');
+  grid.innerHTML = '';
+  camsData.forEach((cam, idx) => {
+    const cls = cam.status === 'incident' ? 'incident' : cam.status === 'unusual' ? 'unusual' : '';
+    const badgeHtml = cam.status === 'incident'
+      ? '<div class="cam-overlay-badge badge-incident">INCIDENTE DETECTADO</div>'
+      : cam.status === 'unusual'
+      ? '<div class="cam-overlay-badge badge-unusual">ACTIVIDAD INUSUAL</div>'
+      : '<div class="cam-overlay-badge badge-online">EN LÍNEA</div>';
+
+    const card = document.createElement('div');
+    card.className = `cam-card ${cls}`;
+    card.dataset.camid = cam.id;
+    card.dataset.zone = cam.zone;
+    card.innerHTML = `
+      <div class="cam-feed">
+        <canvas id="cam-canvas-${idx}" class="live-canvas"></canvas>
+        ${badgeHtml}
+        ${cam.status !== 'online' ? `<div class="detection-box ${cam.status === 'incident' ? 'red' : 'yellow'}" style="width:60px;height:100px;left:60%;top:20%;"></div>` : ''}
+      </div>
+      <div class="cam-card-info">
+        <div class="cam-card-name">${cam.id} - ${cam.name}</div>
+        <div class="cam-card-loc">${cam.zone}</div>
+        <div class="cam-card-actions">
+          <div class="cam-action-btn" onclick="event.stopPropagation();openCamera('${cam.id} - ${cam.name}')" title="Ver en vivo">▶</div>
+          <div class="cam-action-btn" onclick="event.stopPropagation();showToast('Pantalla completa: ${cam.id}','info')" title="Pantalla completa">⛶</div>
+          <div class="cam-action-btn" onclick="event.stopPropagation();showToast('Grabando ${cam.id}...','info')" title="Grabar">⏺</div>
+          <div class="cam-action-btn" onclick="event.stopPropagation();showToast('Configurando ${cam.id}','info')" title="Configurar">⚙</div>
+          <div class="cam-action-btn" style="color:var(--accent-green);border-color:rgba(0,200,83,0.3);" title="Estado">●</div>
+        </div>
+      </div>`;
+    card.addEventListener('click', () => openCamera(`${cam.id} - ${cam.name}`));
+    grid.appendChild(card);
+    // Draw live feeds
+    setTimeout(() => startCamAnimation(`cam-canvas-${idx}`, cam.status), 100);
+  });
+}
+
+function filterCameras(val) {
+  document.querySelectorAll('.cam-card').forEach(c => {
+    const name = c.querySelector('.cam-card-name').textContent.toLowerCase();
+    c.style.display = name.includes(val.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function filterByZone(zone) {
+  document.querySelectorAll('.cam-card').forEach(c => {
+    c.style.display = (zone === 'Todas las zonas' || c.dataset.zone === zone) ? '' : 'none';
+  });
+}
+
+function setView(type, btn) {
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById('cams-grid');
+  if (type === 'list') {
+    grid.style.gridTemplateColumns = '1fr';
+    showToast('Vista de lista activada', 'info');
+  } else {
+    grid.style.gridTemplateColumns = 'repeat(3,1fr)';
+    showToast('Vista de cuadrícula activada', 'info');
+  }
+}
+
+function openCamera(name) {
+  document.getElementById('cam-modal-title').textContent = name;
+  document.getElementById('cam-modal-overlay').classList.add('open');
+  setTimeout(() => startCamAnimation('cam-modal-canvas', 'online', true), 100);
+}
+
+// ===========================
+// LIVE CAM ANIMATION
+// ===========================
+function startCamAnimation(canvasId, status, large) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const parent = canvas.parentElement;
+  canvas.width = parent ? parent.offsetWidth : 300;
+  canvas.height = parent ? parent.offsetHeight : 200;
+  const ctx = canvas.getContext('2d');
+  if (animFrames[canvasId]) cancelAnimationFrame(animFrames[canvasId]);
+
+  let t = 0;
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    // Dark street scene
+    ctx.fillStyle = '#05080f';
+    ctx.fillRect(0, 0, w, h);
+
+    // Sky gradient
+    const sky = ctx.createLinearGradient(0, 0, 0, h * 0.5);
+    sky.addColorStop(0, '#0a1020');
+    sky.addColorStop(1, '#0d1830');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h * 0.5);
+
+    // Buildings
+    const buildH = [0.55, 0.45, 0.60, 0.40, 0.50, 0.42];
+    buildH.forEach((bh, i) => {
+      ctx.fillStyle = `hsl(220, 20%, ${8 + i * 2}%)`;
+      ctx.fillRect(i * (w / 6), h * (1 - bh), w / 6, h * bh);
+      // Windows
+      ctx.fillStyle = 'rgba(255,240,180,0.3)';
+      for (let wy = 0; wy < 4; wy++) {
+        for (let wx = 0; wx < 3; wx++) {
+          if (Math.random() > 0.3 || (t % 120 === 0 && Math.random() > 0.7)) {
+            ctx.fillRect(i * (w / 6) + wx * (w/18) + 4, h * (1 - bh) + wy * 14 + 8, 6, 8);
+          }
+        }
+      }
+    });
+
+    // Road
+    ctx.fillStyle = '#151e2e';
+    ctx.fillRect(0, h * 0.65, w, h * 0.35);
+
+    // Road lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([20, 15]);
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.82);
+    ctx.lineTo(w, h * 0.82);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Street lights
+    [0.15, 0.5, 0.82].forEach(lx => {
+      ctx.fillStyle = '#2a3550';
+      ctx.fillRect(lx * w - 1.5, h * 0.5, 3, h * 0.3);
+      const grd = ctx.createRadialGradient(lx * w, h * 0.5, 0, lx * w, h * 0.5, 60);
+      grd.addColorStop(0, 'rgba(255,240,180,0.15)');
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(lx * w, h * 0.5, 60, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,240,180,0.8)';
+      ctx.beginPath();
+      ctx.arc(lx * w, h * 0.5, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Moving cars
+    const carX = ((t * 1.5) % (w + 100)) - 50;
+    const carX2 = w - ((t * 0.8) % (w + 100));
+    drawCar(ctx, carX, h * 0.74, 1);
+    drawCar(ctx, carX2, h * 0.88, -1);
+
+    // Person silhouette (for unusual/incident)
+    if (status === 'unusual' || status === 'incident') {
+      const px = 0.55 * w + Math.sin(t * 0.02) * 5;
+      const py = h * 0.72;
+      ctx.fillStyle = status === 'incident' ? 'rgba(244,67,54,0.9)' : 'rgba(255,193,7,0.9)';
+      ctx.beginPath();
+      ctx.arc(px, py - 12, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(px - 3, py - 7, 6, 14);
+      ctx.fillRect(px - 6, py + 7, 5, 10);
+      ctx.fillRect(px + 1, py + 7, 5, 10);
+    }
+
+    // Scan line effect
+    ctx.fillStyle = `rgba(30,110,247,${0.02 + 0.01 * Math.sin(t * 0.1)})`;
+    const scanY = (t * 2) % h;
+    ctx.fillRect(0, scanY, w, 2);
+
+    // Timestamp
+    const now = new Date();
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(0, 0, w, 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`REC ● ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`, 4, 11);
+
+    t++;
+    animFrames[canvasId] = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function drawCar(ctx, x, y, dir) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (dir < 0) ctx.scale(-1, 1);
+  ctx.fillStyle = '#2a3a5e';
+  ctx.beginPath();
+  ctx.roundRect(-15, -8, 30, 10, 2);
+  ctx.fill();
+  ctx.fillStyle = '#1e2d48';
+  ctx.fillRect(-12, -14, 24, 8);
+  // Headlights
+  const grd = ctx.createRadialGradient(14, -4, 0, 14, -4, 20);
+  grd.addColorStop(0, 'rgba(255,240,200,0.8)');
+  grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(14, -4, 20, -0.5, 0.5);
+  ctx.fill();
+  ctx.restore();
+}
+
+// ===========================
+// DRONE MAP
+// ===========================
+function initDroneMap() {
+  const container = document.querySelector('.drones-map-area');
+  const canvas = document.getElementById('drone-map-canvas');
+  if (!canvas || !container) return;
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  const ctx = canvas.getContext('2d');
+
+  let t = 0;
+  const drone1 = { x: 0.35, y: 0.27, tx: 0.50, ty: 0.55 };
+
+  function drawDroneMap() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#080c18';
+    ctx.fillRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = 'rgba(30,110,247,0.06)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < w; i += 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke(); }
+    for (let i = 0; i < h; i += 50) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke(); }
+
+    // Roads
+    const roads = [[0,0.25,1,0.25],[0,0.55,1,0.55],[0,0.80,1,0.80],[0.25,0,0.25,1],[0.55,0,0.55,1],[0.78,0,0.78,1]];
+    roads.forEach(r => {
+      ctx.strokeStyle = '#1a2540'; ctx.lineWidth = 14;
+      ctx.beginPath(); ctx.moveTo(r[0]*w,r[1]*h); ctx.lineTo(r[2]*w,r[3]*h); ctx.stroke();
+    });
+
+    // Zones
+    ctx.fillStyle = 'rgba(0,200,83,0.06)'; ctx.strokeStyle = 'rgba(0,200,83,0.2)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.rect(0.28*w,0.55*h,0.22*w,0.22*h); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = 'rgba(244,67,54,0.1)'; ctx.strokeStyle = 'rgba(244,67,54,0.4)';
+    ctx.beginPath(); ctx.arc(0.48*w, 0.28*h, 30, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = 'rgba(156,39,176,0.1)'; ctx.strokeStyle = 'rgba(156,39,176,0.4)';
+    ctx.beginPath(); ctx.arc(0.72*w, 0.22*h, 25, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = 'rgba(30,110,247,0.08)'; ctx.strokeStyle = 'rgba(30,110,247,0.3)';
+    ctx.beginPath(); ctx.rect(0.44*w,0.30*h,0.10*w,0.06*h); ctx.fill(); ctx.stroke();
+
+    // Zone labels
+    ctx.fillStyle = 'rgba(138,150,179,0.5)'; ctx.font = '11px Inter'; ctx.textAlign = 'center';
+    ['COL. CENTRO','COL. SAN MIGUEL','COL. VISTA\nHERMOSA','COL. DEL\nBOSQUE','COL. LA PAZ'].forEach((l, i) => {
+      const positions = [[0.12,0.15],[0.67,0.15],[0.42,0.42],[0.38,0.68],[0.68,0.68]];
+      l.split('\n').forEach((line, li) => ctx.fillText(line, positions[i][0]*w, positions[i][1]*h + li*13));
+    });
+
+    // Animate drone 1
+    const dx = drone1.tx - drone1.x;
+    const dy = drone1.ty - drone1.y;
+    const spd = 0.001;
+    drone1.x += dx * spd;
+    drone1.y += dy * spd;
+    if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
+      drone1.tx = 0.3 + Math.random() * 0.4;
+      drone1.ty = 0.2 + Math.random() * 0.5;
+    }
+
+    // Drone paths
+    ctx.strokeStyle = 'rgba(30,110,247,0.4)'; ctx.setLineDash([6,4]); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(drone1.x*w, drone1.y*h); ctx.lineTo(0.30*w, 0.44*h); ctx.lineTo(0.38*w,0.52*h); ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,200,83,0.4)';
+    ctx.beginPath(); ctx.moveTo(0.30*w,0.44*h); ctx.lineTo(0.55*w,0.68*h); ctx.lineTo(0.68*w,0.78*h); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Drones
+    const drones = [
+      { x: drone1.x, y: drone1.y, color: '#00c853', label: 'DRON 01\nEn misión\n🔋 85%' },
+      { x: 0.30, y: 0.44, color: '#00c853', label: 'DRON 02\nEn misión\n🔋 72%' },
+      { x: 0.62, y: 0.35, color: '#ffc107', label: 'DRON 03\nEn espera\n🔋 100%' },
+      { x: 0.50, y: 0.63, color: '#f44336', label: 'DRON 04\nSin conexión\n🔋 --%' },
+    ];
+
+    drones.forEach(d => {
+      // Glow
+      const grd = ctx.createRadialGradient(d.x*w, d.y*h, 0, d.x*w, d.y*h, 30);
+      grd.addColorStop(0, d.color + '30');
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.beginPath(); ctx.arc(d.x*w, d.y*h, 30, 0, Math.PI*2); ctx.fill();
+
+      // Body
+      ctx.fillStyle = '#131929'; ctx.strokeStyle = d.color; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(d.x*w, d.y*h, 16, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.font = '14px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🚁', d.x*w, d.y*h);
+      ctx.textBaseline = 'alphabetic';
+
+      // Label bubble
+      const lines = d.label.split('\n');
+      const bw = 110, bh = lines.length * 14 + 8;
+      const bx = d.x * w + 20, by = d.y * h - bh / 2;
+      ctx.fillStyle = '#131929'; ctx.strokeStyle = d.color; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 4); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e8edf8'; ctx.font = '10px Inter'; ctx.textAlign = 'left';
+      lines.forEach((l, i) => {
+        ctx.fillStyle = i === 0 ? '#e8edf8' : i === 2 ? d.color : '#8a96b3';
+        ctx.font = i === 0 ? '600 10px Inter' : '10px Inter';
+        ctx.fillText(l, bx + 6, by + 12 + i * 14);
+      });
+    });
+
+    t++;
+    animFrames['drone-map'] = requestAnimationFrame(drawDroneMap);
+  }
+  if (animFrames['drone-map']) cancelAnimationFrame(animFrames['drone-map']);
+  drawDroneMap();
+}
+
+function initDroneLiveCanvas() {
+  startCamAnimation('drone-live-canvas', 'online');
+}
+
+// ===========================
+// ALERTAS TABLE
+// ===========================
+const alertsData = [
+  { priority: 'Alta', color: 'red', type: 'Incidente', icon: '🏃', desc: 'Movimiento sospechoso', cam: 'Cam 03', loc: 'Av. Principal 123, Los Álamos', time: '10:24 AM', status: 'activa' },
+  { priority: 'Media', color: 'yellow', type: 'Vehículo sospechoso', icon: '🚗', desc: 'Vehículo merodeando', cam: 'Cam 07', loc: 'Parque Central, Zona Norte', time: '10:18 AM', status: 'activa' },
+  { priority: 'Media', color: 'yellow', type: 'Actividad inusual', icon: '👥', desc: 'Agrupación de personas', cam: 'Cam 02', loc: 'Plaza San Martín, Zona Centro', time: '10:15 AM', status: 'activa' },
+  { priority: 'Baja', color: 'green', type: 'Reporte ciudadano', icon: '📢', desc: 'Ruido excesivo', cam: 'App', loc: 'Jr. Las Flores 456, Vista Hermosa', time: '09:58 AM', status: 'atendida' },
+  { priority: 'Alta', color: 'red', type: 'Incidente', icon: '🏃', desc: 'Posible robo', cam: 'Cam 05', loc: 'Calle 45 con Av. Lima, Zona Sur', time: '09:42 AM', status: 'atendida' },
+  { priority: 'Media', color: 'yellow', type: 'Actividad inusual', icon: '📦', desc: 'Objeto abandonado', cam: 'Cam 08', loc: 'Estación de Metro, Zona Centro', time: '09:30 AM', status: 'atendida' },
+  { priority: 'Baja', color: 'blue', type: 'Falla técnica', icon: '📹', desc: 'Cámara sin conexión', cam: 'Cam 12', loc: 'Calle Los Pinos 789, Residencial', time: '09:12 AM', status: 'progreso' },
+  { priority: 'Baja', color: 'purple', type: 'Reporte ciudadano', icon: '💡', desc: 'Alumbrado público dañado', cam: 'App', loc: 'Parque Infantil, Zona Este', time: '08:55 AM', status: 'atendida' },
+];
+
+function initAlertasTable() {
+  const tbody = document.getElementById('alertas-tbody');
+  tbody.innerHTML = '';
+  alertsData.forEach((a, idx) => {
+    const statusMap = { activa: 'status-activa', atendida: 'status-atendida', progreso: 'status-progreso' };
+    const statusLabel = { activa: 'Activa', atendida: 'Atendida', progreso: 'En progreso' };
+    const dotColors = { Alta: '#f44336', Media: '#ffc107', Baja: '#00c853' };
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="priority-badge"><div class="priority-dot" style="background:${dotColors[a.priority]}"></div>${a.priority}</div></td>
+      <td><span style="font-size:16px;">${a.icon}</span> ${a.type}</td>
+      <td><strong>${a.desc}</strong><br><span style="color:var(--text-secondary);font-size:11px;">Detectado por ${a.cam}</span></td>
+      <td style="color:var(--text-secondary);font-size:12px;">${a.loc}</td>
+      <td style="font-size:12px;">${a.time}<br><span style="color:var(--text-dim)">Hoy</span></td>
+      <td><span class="status-badge ${statusMap[a.status]}">${statusLabel[a.status]}</span></td>
+      <td>›</td>`;
+    tr.addEventListener('click', () => selectAlert(tr, a));
+    tbody.appendChild(tr);
+    if (idx === 0) selectAlert(tr, a);
+  });
+}
+
+function selectAlert(row, data) {
+  document.querySelectorAll('#alertas-tbody tr').forEach(r => r.classList.remove('selected-row'));
+  row.classList.add('selected-row');
+  document.getElementById('detail-title').textContent = data.desc;
+  document.getElementById('detail-source').textContent = `Detectado por ${data.cam}`;
+  document.getElementById('detail-loc').textContent = data.loc;
+  startCamAnimation('detail-cam-canvas', data.status === 'activa' && data.priority === 'Alta' ? 'incident' : 'online');
+  initDetailMiniMap();
+}
+
+function initDetailMiniMap() {
+  const canvas = document.getElementById('detail-mini-map');
+  if (!canvas) return;
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#080c18';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = '#1a2540'; ctx.lineWidth = 8;
+  [[0,0.5,1,0.5],[0.5,0,0.5,1]].forEach(r => { ctx.beginPath(); ctx.moveTo(r[0]*w,r[1]*h); ctx.lineTo(r[2]*w,r[3]*h); ctx.stroke(); });
+}
+
+function filterAlertsByType(type) {
+  showToast(`Mostrando: ${type}`, 'info');
+}
+function filterAlertsSearch(val) {
+  if (!val) return;
+  showToast(`Buscando: "${val}"`, 'info');
+}
+function enviarPatrulla() {
+  showToast('🚓 Patrulla enviada a la ubicación', 'success');
+}
+function cerrarAlerta() {
+  showToast('✓ Alerta cerrada correctamente', 'success');
+  const badge = parseInt(document.getElementById('topbar-badge').textContent) - 1;
+  document.getElementById('topbar-badge').textContent = Math.max(0, badge);
+  document.getElementById('nav-badge').textContent = Math.max(0, badge);
+}
+
+// ===========================
+// HISTORIAL
+// ===========================
+function initHistorial() {
+  const tbody = document.getElementById('historial-tbody');
+  const events = [
+    { time: '10:24', type: '🔴 Incidente', event: 'Movimiento sospechoso detectado', source: 'Cam 03', status: 'Activa' },
+    { time: '10:18', type: '⚠️ Actividad', event: 'Vehículo sospechoso identificado', source: 'Cam 07', status: 'Activa' },
+    { time: '10:00', type: '🚁 Dron', event: 'DRON 01 inició misión Norte', source: 'Sistema', status: 'Completado' },
+    { time: '09:58', type: '📢 Ciudadano', event: 'Reporte de ruido excesivo', source: 'App móvil', status: 'Atendida' },
+    { time: '09:45', type: '📹 Cámara', event: 'Cam 12 perdió conexión', source: 'Sistema', status: 'En progreso' },
+    { time: '09:30', type: '⚠️ Actividad', event: 'Objeto abandonado en metro', source: 'Cam 08', status: 'Atendida' },
+    { time: '09:15', type: '🚁 Dron', event: 'DRON 04 sin señal', source: 'Sistema', status: 'Sin resolver' },
+    { time: '09:00', type: '📹 Cámara', event: 'Cam 05 reconectada', source: 'Sistema', status: 'Completado' },
+    { time: '08:55', type: '💡 Ciudadano', event: 'Alumbrado dañado reportado', source: 'App móvil', status: 'Atendida' },
+    { time: '08:30', type: '⚙️ Sistema', event: 'Actualización del sistema aplicada', source: 'Admin', status: 'Completado' },
+  ];
+  tbody.innerHTML = events.map(e => `
+    <tr style="cursor:pointer;" onclick="showToast('Evento: ${e.event}','info')">
+      <td style="padding:10px 12px;font-size:12px;color:var(--text-secondary);">${e.time} AM</td>
+      <td style="padding:10px 12px;font-size:12px;">${e.type}</td>
+      <td style="padding:10px 12px;font-size:13px;font-weight:500;">${e.event}</td>
+      <td style="padding:10px 12px;font-size:12px;color:var(--text-secondary);">${e.source}</td>
+      <td style="padding:10px 12px;"><span class="tag ${e.status === 'Activa' ? 'tag-red' : e.status === 'Completado' ? 'tag-green' : e.status === 'En progreso' ? 'tag-blue' : 'tag-yellow'}">${e.status}</span></td>
+    </tr>`).join('');
+}
+
+// ===========================
+// MINI MAP (CAMERAS PAGE)
+// ===========================
+function initMiniMapCam() {
+  const canvas = document.getElementById('mini-map-cam');
+  if (!canvas) return;
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#080c18'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = '#1a2540'; ctx.lineWidth = 6;
+  [[0,0.3,1,0.3],[0,0.7,1,0.7],[0.35,0,0.35,1],[0.65,0,0.65,1]].forEach(r => {
+    ctx.beginPath(); ctx.moveTo(r[0]*w,r[1]*h); ctx.lineTo(r[2]*w,r[3]*h); ctx.stroke();
+  });
+  const dots = [
+    [0.2,0.2,'#00c853'],[0.5,0.15,'#00c853'],[0.8,0.2,'#ffc107'],
+    [0.15,0.55,'#00c853'],[0.5,0.55,'#00c853'],[0.8,0.55,'#ffc107'],
+    [0.2,0.82,'#00c853'],[0.5,0.78,'#00c853'],[0.78,0.82,'#f44336'],
+  ];
+  dots.forEach(d => {
+    ctx.beginPath(); ctx.arc(d[0]*w,d[1]*h,5,0,Math.PI*2);
+    ctx.fillStyle = d[2]; ctx.fill();
+  });
+}
+
+// ===========================
+// ACTIVITY CHART
+// ===========================
+function initActivityChart() {
+  const canvas = document.getElementById('activity-chart');
+  if (!canvas) return;
+  const parent = canvas.parentElement;
+  canvas.width = parent.offsetWidth - 32;
+  canvas.height = parent.offsetHeight - 50;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const hours = ['00','02','04','06','08','10','12','14','16','18','20','22','00'];
+  const data1 = [2,1,0,1,3,8,12,15,18,22,19,14,10];
+  const data2 = [1,0,0,0,1,3,5,6,8,11,9,7,4];
+
+  ctx.clearRect(0,0,w,h);
+  const pad = {top:20,right:20,bottom:30,left:40};
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const max = Math.max(...data1) * 1.2;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (ch / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+cw,y); ctx.stroke();
+    ctx.fillStyle = 'rgba(138,150,179,0.5)'; ctx.font = '10px Inter'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round(max - (max/4)*i), pad.left-6, y+4);
+  }
+
+  // X axis labels
+  ctx.fillStyle = 'rgba(138,150,179,0.5)'; ctx.font = '10px Inter'; ctx.textAlign = 'center';
+  hours.forEach((h2, i) => {
+    const x = pad.left + (cw / (hours.length - 1)) * i;
+    ctx.fillText(h2, x, pad.top + ch + 20);
+  });
+
+  // Line 1 (alerts)
+  const grd1 = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch);
+  grd1.addColorStop(0, 'rgba(30,110,247,0.3)');
+  grd1.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd1;
+  ctx.beginPath();
+  data1.forEach((v, i) => {
+    const x = pad.left + (cw / (data1.length - 1)) * i;
+    const y = pad.top + ch - (v / max) * ch;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad.left + cw, pad.top + ch);
+  ctx.lineTo(pad.left, pad.top + ch);
+  ctx.closePath(); ctx.fill();
+
+  ctx.strokeStyle = '#1e6ef7'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  data1.forEach((v, i) => {
+    const x = pad.left + (cw / (data1.length - 1)) * i;
+    const y = pad.top + ch - (v / max) * ch;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Line 2 (incidents)
+  ctx.strokeStyle = '#f44336'; ctx.lineWidth = 2;
+  ctx.setLineDash([5,3]);
+  ctx.beginPath();
+  data2.forEach((v, i) => {
+    const x = pad.left + (cw / (data2.length - 1)) * i;
+    const y = pad.top + ch - (v / max) * ch;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Legend
+  ctx.font = '11px Inter'; ctx.textAlign = 'left';
+  ctx.fillStyle = '#1e6ef7'; ctx.fillRect(pad.left, 2, 20, 3);
+  ctx.fillStyle = '#e8edf8'; ctx.fillText('Total eventos', pad.left + 26, 9);
+  ctx.fillStyle = '#f44336'; ctx.fillRect(pad.left + 120, 2, 20, 3);
+  ctx.fillStyle = '#e8edf8'; ctx.fillText('Incidentes', pad.left + 146, 9);
+}
+
+// ===========================
+// DRONES ACTIONS
+// ===========================
+function dronMove(dir) {
+  const dirs = { arriba: '⬆️', abajo: '⬇️', izquierda: '⬅️', derecha: '➡️' };
+  showToast(`DRON 01 moviéndose ${dirs[dir]}`, 'info');
+}
+
+function dronAction(action) {
+  const msgs = {
+    base: '🏠 DRON 01 retornando a base',
+    ruta: '🗺️ DRON 01 siguiendo ruta automática',
+    foto: '📸 Foto capturada correctamente',
+    video: '⏺️ Grabación de video iniciada',
+    'zoom+': '🔍 Zoom aumentado',
+    'zoom-': '🔍 Zoom reducido',
+    luz: '💡 Luz del dron activada',
+    bocina: '📢 Bocina activada',
+    sos: '🆘 Señal SOS enviada al equipo',
+  };
+  const types = { foto: 'success', sos: 'error', video: 'info', base: 'warning' };
+  showToast(msgs[action] || action, types[action] || 'info');
+}
+
+function selectDrone(el, name) {
+  document.querySelectorAll('.drone-list-item').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  showToast(`${name} seleccionado`, 'info');
+}
+
+function assignMission() {
+  showToast('Asignando nueva misión al dron...', 'info');
+}
+
+function finalizarMision() {
+  showToast('Misión finalizada. Dron retornando a base.', 'success');
+}
+
+// ===========================
+// USER MENU
+// ===========================
+function showUserMenu() {
+  showToast('Menú de usuario', 'info');
+}
+
+// ===========================
+// INIT
+// ===========================
+window.addEventListener('load', () => {
+  initActivityChart();
+  // Start thumbnail animations
+  setTimeout(() => {
+    ['ct1','ct2','ct3','ct4','ct5'].forEach((id, i) => {
+      const statuses = ['online','online','unusual','online','incident'];
+      startCamAnimation(id, statuses[i]);
+    });
+  }, 500);
+});
+
+// Handle resize
+window.addEventListener('resize', () => {
+  if (currentPage === 'mapa') initMapCanvas();
+  if (currentPage === 'drones') initDroneMap();
+  if (currentPage === 'inicio') initActivityChart();
+});
+
+// Simulate live alert
+setTimeout(() => {
+  showToast('🔴 Nuevo incidente detectado - Cam 09', 'error');
+}, 8000);
+
+setTimeout(() => {
+  showToast('🚁 DRON 01 - Batería al 80%', 'warning');
+}, 15000);
+</script>
+</body>
+</html>
